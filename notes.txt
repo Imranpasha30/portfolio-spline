@@ -1,0 +1,9 @@
+#instll the react 
+
+npm create vite@latest .   (after comand `.` means install in the current directory and insted of `.` if u use anyname 
+it will create folder and install inside it example of the comand look like `npm create vite@latest projectname`)
+
+
+
+/install tailwindcss 
+npm install tailwindcss @tailwindcss/vite
