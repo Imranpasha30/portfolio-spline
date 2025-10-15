@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Terminal, FolderOpen, Rocket, User, Mail } from 'lucide-react';
 
-const Dock = () => {
+const Dock = ({ onTerminalClick }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const dockItems = [
-        { id: 1, name: 'Terminal', icon: Terminal, color: 'bg-black' },
+        { id: 1, name: 'Terminal', icon: Terminal, color: 'bg-black', onClick: onTerminalClick },
         { id: 2, name: 'Files', icon: FolderOpen, color: 'bg-black' },
         { id: 3, name: 'Projects', icon: Rocket, color: 'bg-black' },
         { id: 4, name: 'About', icon: User, color: 'bg-black' },
@@ -39,7 +39,10 @@ const Dock = () => {
                                     {item.name}
                                 </span>
 
-                                <button className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ease-out shadow-lg border border-gray-700/50 ${getScale(index)} group-hover:-translate-y-2 active:scale-95`}>
+                                <button
+                                    onClick={item.onClick}
+                                    className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ease-out shadow-lg border border-gray-700/50 ${getScale(index)} group-hover:-translate-y-2 active:scale-95`}
+                                >
                                     <IconComponent className="text-white" size={24} strokeWidth={2} />
                                 </button>
                             </li>

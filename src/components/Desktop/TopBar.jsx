@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, Volume2, Battery, Power, Grid3x3, Settings, Moon, Monitor, Signal } from 'lucide-react';
+import { Wifi, WifiOff, Volume2, Battery, Power, Grid3x3, Settings, Moon, Monitor, Signal, Terminal } from 'lucide-react';
 
-const TopBar = () => {
+const TopBar = ({ minimizedWindows = [], onRestoreWindow }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [showAppsMenu, setShowAppsMenu] = useState(false);
     const [showSystemMenu, setShowSystemMenu] = useState(false);
@@ -79,7 +79,7 @@ const TopBar = () => {
     return (
         <>
             <div className="fixed top-0 left-0 right-0 h-8 bg-black/90 backdrop-blur-sm border-b border-gray-800/50 flex items-center justify-between px-4 z-50 text-white text-sm">
-                {/* Left Side - Applications Menu */}
+                {/* Left Side - Applications Menu and Minimized Windows */}
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => {
@@ -91,6 +91,23 @@ const TopBar = () => {
                         <Grid3x3 size={14} />
                         <span className="font-medium">Applications</span>
                     </button>
+
+                    {/* Minimized Windows */}
+                    {minimizedWindows.length > 0 && (
+                        <div className="flex items-center gap-2 ml-2">
+                            {minimizedWindows.map(window => (
+                                <button
+                                    key={window.id}
+                                    onClick={() => onRestoreWindow(window.id)}
+                                    className="flex items-center gap-2 bg-gray-700/50 hover:bg-gray-600/50 px-3 py-1 rounded transition-colors"
+                                    title="Click to restore"
+                                >
+                                    <Terminal size={14} />
+                                    <span className="text-xs">Terminal</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Center - Date & Time */}
