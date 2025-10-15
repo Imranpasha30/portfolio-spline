@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Terminal, FolderOpen, Rocket, User, Mail } from 'lucide-react';
 
-const Dock = ({ onTerminalClick }) => {
+const Dock = ({ onTerminalClick, onFileManagerClick, onProjectsClick, onAboutClick }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const dockItems = [
         { id: 1, name: 'Terminal', icon: Terminal, color: 'bg-black', onClick: onTerminalClick },
-        { id: 2, name: 'Files', icon: FolderOpen, color: 'bg-black' },
-        { id: 3, name: 'Projects', icon: Rocket, color: 'bg-black' },
-        { id: 4, name: 'About', icon: User, color: 'bg-black' },
+        { id: 2, name: 'Files', icon: FolderOpen, color: 'bg-black', onClick: onFileManagerClick },
+        { id: 3, name: 'Projects', icon: Rocket, color: 'bg-black', onClick: onProjectsClick },
+        { id: 4, name: 'About', icon: User, color: 'bg-black', onClick: onAboutClick },
         { id: 5, name: 'Contact', icon: Mail, color: 'bg-black' },
     ];
 

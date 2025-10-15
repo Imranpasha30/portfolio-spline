@@ -2,12 +2,37 @@ import React, { useState, useRef } from 'react';
 import { Rnd } from 'react-rnd';
 import { X, Minus, Maximize2, Minimize2 } from 'lucide-react';
 
-const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
+const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen, zIndex = 40, offsetX = 100, offsetY = 100, onFocus }) => {
     const [isMaximized, setIsMaximized] = useState(false);
     const [previousSize, setPreviousSize] = useState({ width: 800, height: 500, x: 100, y: 100 });
     const [size, setSize] = useState({ width: 800, height: 500 });
-    const [position, setPosition] = useState({ x: 100, y: 100 });
+
     const rndRef = useRef(null);
+    const [position, setPosition] = useState({ x: offsetX, y: offsetY });
+
+    // File system structure
+    const fileSystemStructure = {
+        '/home/imran': {
+            type: 'directory',
+            contents: ['Desktop', 'Documents', 'Downloads', 'Pictures', 'script.py', 'notes.txt', 'tools.zip', 'wallpaper.jpg']
+        },
+        '/home/imran/Desktop': {
+            type: 'directory',
+            contents: []
+        },
+        '/home/imran/Documents': {
+            type: 'directory',
+            contents: ['resume.pdf', 'cover-letter.txt']
+        },
+        '/home/imran/Downloads': {
+            type: 'directory',
+            contents: ['installer.exe', 'archive.zip']
+        },
+        '/home/imran/Pictures': {
+            type: 'directory',
+            contents: ['photo1.jpg', 'photo2.png', 'screenshot.png']
+        }
+    };
 
     // Terminal state
     const [history, setHistory] = useState([
@@ -15,6 +40,7 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
         { type: 'output', content: "Type 'help' for available commands" }
     ]);
     const [input, setInput] = useState('');
+    const [currentPath, setCurrentPath] = useState('/home/imran');
     const inputRef = useRef(null);
 
     const handleMaximize = () => {
@@ -36,13 +62,16 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
     };
 
     const handleCommand = (cmd) => {
-        const trimmedCmd = cmd.trim().toLowerCase();
+        const trimmedCmd = cmd.trim();
+        const parts = trimmedCmd.split(' ');
+        const command = parts[0].toLowerCase();
+        const args = parts.slice(1);
 
         // Add command to history
         setHistory(prev => [...prev, { type: 'command', content: cmd }]);
 
         // Process commands
-        switch (trimmedCmd) {
+        switch (command) {
             case 'help':
                 setHistory(prev => [...prev,
                 { type: 'output', content: 'Available commands:' },
@@ -51,15 +80,116 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
                 { type: 'output', content: '  skills   - My skills' },
                 { type: 'output', content: '  projects - View projects' },
                 { type: 'output', content: '  contact  - Contact information' },
+                { type: 'output', content: '  ls       - List directory contents' },
+                { type: 'output', content: '  cd       - Change directory' },
+                { type: 'output', content: '  pwd      - Print working directory' },
+                { type: 'output', content: '  cat      - Display file contents' },
                 { type: 'output', content: '  clear    - Clear terminal' }
                 ]);
                 break;
+
+            case 'pwd':
+                setHistory(prev => [...prev,
+                { type: 'output', content: currentPath }
+                ]);
+                break;
+
+            case 'ls':
+                const currentDir = fileSystemStructure[currentPath];
+                if (currentDir && currentDir.contents.length > 0) {
+                    const items = currentDir.contents.join('  ');
+                    setHistory(prev => [...prev,
+                    { type: 'output', content: items }
+                    ]);
+                } else {
+                    setHistory(prev => [...prev,
+                    { type: 'output', content: '' }
+                    ]);
+                }
+                break;
+
+            case 'cd':
+                if (args.length === 0) {
+                    setCurrentPath('/home/imran');
+                    break;
+                }
+
+                const targetPath = args[0];
+
+                if (targetPath === '..') {
+                    // Go to parent directory
+                    const pathParts = currentPath.split('/').filter(p => p);
+                    if (pathParts.length > 2) {
+                        pathParts.pop();
+                        setCurrentPath('/' + pathParts.join('/'));
+                    }
+                } else if (targetPath === '~' || targetPath === '/home/imran') {
+                    // Go to home directory
+                    setCurrentPath('/home/imran');
+                } else if (targetPath.startsWith('/')) {
+                    // Absolute path
+                    if (fileSystemStructure[targetPath]) {
+                        setCurrentPath(targetPath);
+                    } else {
+                        setHistory(prev => [...prev,
+                        { type: 'error', content: `cd: ${targetPath}: No such file or directory` }
+                        ]);
+                    }
+                } else {
+                    // Relative path
+                    const newPath = `${currentPath}/${targetPath}`;
+                    if (fileSystemStructure[newPath]) {
+                        setCurrentPath(newPath);
+                    } else {
+                        setHistory(prev => [...prev,
+                        { type: 'error', content: `cd: ${targetPath}: No such file or directory` }
+                        ]);
+                    }
+                }
+                break;
+
+            case 'cat':
+                if (args.length === 0) {
+                    setHistory(prev => [...prev,
+                    { type: 'error', content: 'cat: missing file operand' }
+                    ]);
+                } else {
+                    const fileName = args[0];
+                    // Simulate file contents
+                    if (fileName === 'script.py') {
+                        setHistory(prev => [...prev,
+                        { type: 'output', content: '# Simple Python Script' },
+                        { type: 'output', content: 'print("Hello, World!")' },
+                        { type: 'output', content: 'print("Welcome to my portfolio!")' }
+                        ]);
+                    } else if (fileName === 'notes.txt') {
+                        setHistory(prev => [...prev,
+                        { type: 'output', content: 'Portfolio Ideas:' },
+                        { type: 'output', content: '- Add terminal functionality' },
+                        { type: 'output', content: '- Create file manager' },
+                        { type: 'output', content: '- Add interactive elements' }
+                        ]);
+                    } else if (fileName === 'resume.pdf') {
+                        setHistory(prev => [...prev,
+                        { type: 'output', content: 'Resume.pdf - Full Stack Developer' },
+                        { type: 'output', content: 'Experience: 3+ years in web development' },
+                        { type: 'output', content: 'Skills: React, Node.js, JavaScript, TypeScript' }
+                        ]);
+                    } else {
+                        setHistory(prev => [...prev,
+                        { type: 'error', content: `cat: ${fileName}: No such file or directory` }
+                        ]);
+                    }
+                }
+                break;
+
             case 'about':
                 setHistory(prev => [...prev,
                 { type: 'output', content: 'Hello! I am a Full Stack Developer' },
                 { type: 'output', content: 'Passionate about building amazing web experiences' }
                 ]);
                 break;
+
             case 'skills':
                 setHistory(prev => [...prev,
                 { type: 'output', content: 'Technical Skills:' },
@@ -70,14 +200,14 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
                 { type: 'output', content: '  • MongoDB & PostgreSQL' }
                 ]);
                 break;
+
             case 'projects':
+                onProjectsOpen();
                 setHistory(prev => [...prev,
-                { type: 'output', content: 'Featured Projects:' },
-                { type: 'output', content: '  1. Portfolio Website - Interactive terminal-based portfolio' },
-                { type: 'output', content: '  2. E-commerce Platform - Full-stack shopping application' },
-                { type: 'output', content: '  3. Task Manager - Real-time collaboration tool' }
+                { type: 'output', content: 'Opening Projects window...' }
                 ]);
                 break;
+
             case 'contact':
                 setHistory(prev => [...prev,
                 { type: 'output', content: 'Contact Information:' },
@@ -86,15 +216,18 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
                 { type: 'output', content: '  LinkedIn: linkedin.com/in/yourusername' }
                 ]);
                 break;
+
             case 'clear':
                 setHistory([]);
                 break;
+
             case '':
                 // Just add empty line
                 break;
+
             default:
                 setHistory(prev => [...prev,
-                { type: 'error', content: `Command not found: ${cmd}. Type 'help' for available commands.` }
+                { type: 'error', content: `Command not found: ${command}. Type 'help' for available commands.` }
                 ]);
         }
 
@@ -117,8 +250,8 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
             ref={rndRef}
             dragHandleClassName="drag-handle"
             default={{
-                x: position.x,
-                y: position.y,
+                x: offsetX,
+                y: offsetY,
                 width: size.width,
                 height: size.height,
             }}
@@ -139,9 +272,9 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
                 setPosition(position);
             }}
             bounds="parent"
-            style={{ zIndex: 40 }}
+            style={{ zIndex: zIndex }}
         >
-            <div className="w-full h-full flex flex-col bg-gray-900 rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
+            <div className="w-full h-full flex flex-col bg-gray-900 rounded-lg shadow-2xl border border-gray-700 overflow-hidden" onMouseDown={onFocus}>
                 {/* Window Title Bar - Kali Linux Style */}
                 <div className="drag-handle flex items-center justify-between bg-gray-800 px-4 py-2 border-b border-gray-700 cursor-grab active:cursor-grabbing">
                     <div className="flex items-center gap-3">
@@ -186,7 +319,7 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
                                     <div className="flex items-center gap-2">
                                         <span className="text-blue-400">guest@portfolio</span>
                                         <span className="text-gray-400">:</span>
-                                        <span className="text-purple-400">~</span>
+                                        <span className="text-purple-400">{currentPath === '/home/imran' ? '~' : currentPath.replace('/home/imran', '~')}</span>
                                         <span className="text-gray-400">$</span>
                                         <span className="text-green-400">{item.content}</span>
                                     </div>
@@ -202,7 +335,7 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize }) => {
                         <div className="flex items-center gap-2">
                             <span className="text-blue-400">guest@portfolio</span>
                             <span className="text-gray-400">:</span>
-                            <span className="text-purple-400">~</span>
+                            <span className="text-purple-400">{currentPath === '/home/imran' ? '~' : currentPath.replace('/home/imran', '~')}</span>
                             <span className="text-gray-400">$</span>
                             <input
                                 ref={inputRef}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, Volume2, Battery, Power, Grid3x3, Settings, Moon, Monitor, Signal, Terminal } from 'lucide-react';
+import { Wifi, WifiOff, Volume2, Battery, Power, Grid3x3, Settings, Rocket, Moon, Monitor, Signal, Terminal, FolderOpen, User } from 'lucide-react';
+
 
 const TopBar = ({ minimizedWindows = [], onRestoreWindow }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -93,21 +94,42 @@ const TopBar = ({ minimizedWindows = [], onRestoreWindow }) => {
                     </button>
 
                     {/* Minimized Windows */}
+                    {/* Minimized Windows */}
                     {minimizedWindows.length > 0 && (
                         <div className="flex items-center gap-2 ml-2">
                             {minimizedWindows.map(window => (
                                 <button
                                     key={window.id}
-                                    onClick={() => onRestoreWindow(window.id)}
+                                    onClick={() => onRestoreWindow(window.id, window.type)}
                                     className="flex items-center gap-2 bg-gray-700/50 hover:bg-gray-600/50 px-3 py-1 rounded transition-colors"
                                     title="Click to restore"
-                                >
-                                    <Terminal size={14} />
-                                    <span className="text-xs">Terminal</span>
+                                >{window.type === 'terminal' ? (
+                                    <>
+                                        <Terminal size={14} />
+                                        <span className="text-xs">Terminal</span>
+                                    </>
+                                ) : window.type === 'filemanager' ? (
+                                    <>
+                                        <FolderOpen size={14} />
+                                        <span className="text-xs">Files</span>
+                                    </>
+                                ) : window.type === 'projects' ? (
+                                    <>
+                                        <Rocket size={14} />
+                                        <span className="text-xs">Projects</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <User size={14} />
+                                        <span className="text-xs">About</span>
+                                    </>
+                                )}
+
                                 </button>
                             ))}
                         </div>
                     )}
+
                 </div>
 
                 {/* Center - Date & Time */}
