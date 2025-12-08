@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Rnd } from 'react-rnd';
 import { X, Minus, Maximize2, Minimize2 } from 'lucide-react';
 
-const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen, zIndex = 40, offsetX = 100, offsetY = 100, onFocus }) => {
+const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen,onSkillsOpen, zIndex = 40, offsetX = 100, offsetY = 100, onFocus }) => {
     const [isMaximized, setIsMaximized] = useState(false);
     const [previousSize, setPreviousSize] = useState({ width: 800, height: 500, x: 100, y: 100 });
     const [size, setSize] = useState({ width: 800, height: 500 });
@@ -36,7 +36,7 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen, 
 
     // Terminal state
     const [history, setHistory] = useState([
-        { type: 'output', content: 'Welcome to Portfolio Terminal v1.0.0' },
+        { type: 'output', content: 'Welcome to Imran Portfolio Terminal v1.0.0' },
         { type: 'output', content: "Type 'help' for available commands" }
     ]);
     const [input, setInput] = useState('');
@@ -77,7 +77,7 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen, 
                 { type: 'output', content: 'Available commands:' },
                 { type: 'output', content: '  help     - Show this help message' },
                 { type: 'output', content: '  about    - About me' },
-                { type: 'output', content: '  skills   - My skills' },
+                { type: 'output', content: '  skills    - View skills (opens Skills window)' },
                 { type: 'output', content: '  projects - View projects' },
                 { type: 'output', content: '  contact  - Contact information' },
                 { type: 'output', content: '  ls       - List directory contents' },
@@ -191,15 +191,11 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen, 
                 break;
 
             case 'skills':
-                setHistory(prev => [...prev,
-                { type: 'output', content: 'Technical Skills:' },
-                { type: 'output', content: '  • React.js & Next.js' },
-                { type: 'output', content: '  • Node.js & Express' },
-                { type: 'output', content: '  • JavaScript/TypeScript' },
-                { type: 'output', content: '  • Tailwind CSS' },
-                { type: 'output', content: '  • MongoDB & PostgreSQL' }
-                ]);
-                break;
+               onSkillsOpen(); // This will open the Skills window
+    setHistory(prev => [...prev,
+        { type: 'output', content: 'Opening Skills window...' }
+    ]);
+    break;
 
             case 'projects':
                 onProjectsOpen();
@@ -317,7 +313,7 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen, 
                             <div key={index}>
                                 {item.type === 'command' ? (
                                     <div className="flex items-center gap-2">
-                                        <span className="text-blue-400">guest@portfolio</span>
+                                        <span className="text-blue-400">imran@portfolio</span>
                                         <span className="text-gray-400">:</span>
                                         <span className="text-purple-400">{currentPath === '/home/imran' ? '~' : currentPath.replace('/home/imran', '~')}</span>
                                         <span className="text-gray-400">$</span>
@@ -333,7 +329,7 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen, 
 
                         {/* Current Input Line */}
                         <div className="flex items-center gap-2">
-                            <span className="text-blue-400">guest@portfolio</span>
+                            <span className="text-blue-400">imran@portfolio</span>
                             <span className="text-gray-400">:</span>
                             <span className="text-purple-400">{currentPath === '/home/imran' ? '~' : currentPath.replace('/home/imran', '~')}</span>
                             <span className="text-gray-400">$</span>

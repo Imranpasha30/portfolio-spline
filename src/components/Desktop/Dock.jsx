@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Terminal, FolderOpen, Rocket, User, Mail } from 'lucide-react';
+import { Terminal, FolderOpen, Rocket, User, Mail ,Lightbulb } from 'lucide-react';
 
-const Dock = ({ onTerminalClick, onFileManagerClick, onProjectsClick, onAboutClick }) => {
+const Dock = ({ onTerminalClick, onFileManagerClick, onProjectsClick,onSkillsClick, onAboutClick }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
     const dockItems = [
         { id: 1, name: 'Terminal', icon: Terminal, color: 'bg-black', onClick: onTerminalClick },
         { id: 2, name: 'Files', icon: FolderOpen, color: 'bg-black', onClick: onFileManagerClick },
+         { id: 6, name: 'Skills', icon: Lightbulb, color: 'bg-black' , onClick: onSkillsClick },
         { id: 3, name: 'Projects', icon: Rocket, color: 'bg-black', onClick: onProjectsClick },
         { id: 4, name: 'About', icon: User, color: 'bg-black', onClick: onAboutClick },
         { id: 5, name: 'Contact', icon: Mail, color: 'bg-black' },
+        
     ];
 
     const getScale = (index) => {

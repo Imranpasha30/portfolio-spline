@@ -5,6 +5,7 @@ import TerminalWindow from '../Windows/TerminalWindow';
 import FileManagerWindow from '../Windows/FileManagerWindow';
 import ProjectsWindow from '../Windows/ProjectsWindow';
 import AboutWindow from '../Windows/AboutWindow';
+import SkillsWindow from '../Windows/SkillsWindow'; // ADD THIS IMPORT
 import Wallpaper from './Wallpaper';
 
 const Desktop = () => {
@@ -12,6 +13,7 @@ const Desktop = () => {
     const [fileManagers, setFileManagers] = useState([]);
     const [projects, setProjects] = useState([]);
     const [abouts, setAbouts] = useState([]);
+    const [skills, setSkills] = useState([]); // ADD THIS LINE
     const [maxZIndex, setMaxZIndex] = useState(40);
     const [windowOffset, setWindowOffset] = useState(0);
 
@@ -27,6 +29,10 @@ const Desktop = () => {
             setFileManagers(prev => prev.map(fm =>
                 fm.id === windowId ? { ...fm, zIndex: newZIndex } : fm
             ));
+        } else if (windowType === 'skills') { // ADD THIS BLOCK
+            setSkills(prev => prev.map(s =>
+                s.id === windowId ? { ...s, zIndex: newZIndex } : s
+            ));
         } else if (windowType === 'projects') {
             setProjects(prev => prev.map(p =>
                 p.id === windowId ? { ...p, zIndex: newZIndex } : p
@@ -38,6 +44,7 @@ const Desktop = () => {
         }
     };
 
+    // Terminal handlers (existing)
     const handleTerminalOpen = () => {
         const offset = windowOffset % 5;
         const newTerminal = {
@@ -70,6 +77,7 @@ const Desktop = () => {
         ));
     };
 
+    // File Manager handlers (existing)
     const handleFileManagerOpen = () => {
         const offset = windowOffset % 5;
         const newFileManager = {
@@ -102,6 +110,40 @@ const Desktop = () => {
         ));
     };
 
+    // Skills handlers - ADD THIS ENTIRE SECTION
+    const handleSkillsOpen = () => {
+        const offset = windowOffset % 5;
+        const newSkill = {
+            id: Date.now(),
+            isMinimized: false,
+            zIndex: maxZIndex + 1,
+            offsetX: 160 + (offset * 30),
+            offsetY: 90 + (offset * 30)
+        };
+        setMaxZIndex(maxZIndex + 1);
+        setWindowOffset(windowOffset + 1);
+        setSkills(prev => [...prev, newSkill]);
+    };
+
+    const handleSkillsClose = (id) => {
+        setSkills(prev => prev.filter(s => s.id !== id));
+    };
+
+    const handleSkillsMinimize = (id) => {
+        setSkills(prev => prev.map(s =>
+            s.id === id ? { ...s, isMinimized: true } : s
+        ));
+    };
+
+    const handleSkillsRestore = (id) => {
+        const newZIndex = maxZIndex + 1;
+        setMaxZIndex(newZIndex);
+        setSkills(prev => prev.map(s =>
+            s.id === id ? { ...s, isMinimized: false, zIndex: newZIndex } : s
+        ));
+    };
+
+    // Projects handlers (existing)
     const handleProjectsOpen = () => {
         const offset = windowOffset % 5;
         const newProject = {
@@ -134,7 +176,7 @@ const Desktop = () => {
         ));
     };
 
-    // About window logic
+    // About handlers (existing)
     const handleAboutOpen = () => {
         const offset = windowOffset % 5;
         const newAbout = {
@@ -167,9 +209,11 @@ const Desktop = () => {
         ));
     };
 
+    // ADD skills to minimized windows list
     const allMinimizedWindows = [
         ...terminals.filter(t => t.isMinimized).map(t => ({ ...t, type: 'terminal' })),
         ...fileManagers.filter(fm => fm.isMinimized).map(fm => ({ ...fm, type: 'filemanager' })),
+        ...skills.filter(s => s.isMinimized).map(s => ({ ...s, type: 'skills' })), // ADD THIS LINE
         ...projects.filter(p => p.isMinimized).map(p => ({ ...p, type: 'projects' })),
         ...abouts.filter(a => a.isMinimized).map(a => ({ ...a, type: 'about' }))
     ];
@@ -179,6 +223,8 @@ const Desktop = () => {
             handleTerminalRestore(id);
         } else if (type === 'filemanager') {
             handleFileManagerRestore(id);
+        } else if (type === 'skills') { // ADD THIS BLOCK
+            handleSkillsRestore(id);
         } else if (type === 'projects') {
             handleProjectsRestore(id);
         } else if (type === 'about') {
@@ -207,6 +253,7 @@ const Desktop = () => {
                         onClose={() => handleTerminalClose(terminal.id)}
                         onMinimize={() => handleTerminalMinimize(terminal.id)}
                         onProjectsOpen={handleProjectsOpen}
+                        onSkillsOpen={handleSkillsOpen} // ADD THIS LINE
                         onFocus={() => bringToFront(terminal.id, 'terminal')}
                     />
                 ))}
@@ -222,6 +269,21 @@ const Desktop = () => {
                         onClose={() => handleFileManagerClose(fm.id)}
                         onMinimize={() => handleFileManagerMinimize(fm.id)}
                         onFocus={() => bringToFront(fm.id, 'filemanager')}
+                    />
+                ))}
+
+                {/* ADD THIS ENTIRE BLOCK FOR SKILLS WINDOWS */}
+                {skills.map(skill => (
+                    <SkillsWindow
+                        key={skill.id}
+                        id={skill.id}
+                        isMinimized={skill.isMinimized}
+                        zIndex={skill.zIndex}
+                        offsetX={skill.offsetX}
+                        offsetY={skill.offsetY}
+                        onClose={() => handleSkillsClose(skill.id)}
+                        onMinimize={() => handleSkillsMinimize(skill.id)}
+                        onFocus={() => bringToFront(skill.id, 'skills')}
                     />
                 ))}
 
@@ -256,6 +318,7 @@ const Desktop = () => {
                 <Dock
                     onTerminalClick={handleTerminalOpen}
                     onFileManagerClick={handleFileManagerOpen}
+                    onSkillsClick={handleSkillsOpen} // ADD THIS LINE
                     onProjectsClick={handleProjectsOpen}
                     onAboutClick={handleAboutOpen}
                 />
