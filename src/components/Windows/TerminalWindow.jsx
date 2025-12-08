@@ -207,9 +207,9 @@ const TerminalWindow = ({ id, isMinimized, onClose, onMinimize, onProjectsOpen,o
             case 'contact':
                 setHistory(prev => [...prev,
                 { type: 'output', content: 'Contact Information:' },
-                { type: 'output', content: '  Email: your.email@example.com' },
-                { type: 'output', content: '  GitHub: github.com/yourusername' },
-                { type: 'output', content: '  LinkedIn: linkedin.com/in/yourusername' }
+                { type: 'output', content: '  Email: imranpasha.ahmed@gmail.com' },
+                { type: 'output', content: '  GitHub: github.com/Imranpasha30' },
+               
                 ]);
                 break;
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, Code, Database, Wrench, Globe, Cloud, Home as HomeIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { X, Minus, Maximize2, Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   SiReact,
   SiNextdotjs,
@@ -24,6 +24,14 @@ import {
   SiFigma,
   SiWebpack,
   SiNpm,
+  SiPython,
+  SiFlutter,
+  SiAngular,
+  SiC,
+  SiMysql,
+  SiRedis,
+  SiFastapi,
+  SiDjango,
 } from 'react-icons/si';
 
 const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 160, offsetY = 90, onFocus }) => {
@@ -34,96 +42,160 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
   const [selectedCategory, setSelectedCategory] = useState('home');
   const rndRef = useRef(null);
 
-  // Skills Data for Orbiting Animation with brand colors
+  // Skills Data for Orbiting Animation
   const orbitSkills = {
     orbit1: [
       { name: 'React', icon: <SiReact />, color: '#61DAFB' },
-      { name: 'Next.js', icon: <SiNextdotjs />, color: '#000000' },
+      { name: 'Next.js', icon: <SiNextdotjs />, color: '#FFFFFF' },
       { name: 'JavaScript', icon: <SiJavascript />, color: '#F7DF1E' },
       { name: 'TypeScript', icon: <SiTypescript />, color: '#3178C6' },
       { name: 'HTML5', icon: <SiHtml5 />, color: '#E34F26' },
       { name: 'CSS3', icon: <SiCss3 />, color: '#1572B6' },
       { name: 'Tailwind', icon: <SiTailwindcss />, color: '#06B6D4' },
+      { name: 'Angular', icon: <SiAngular />, color: '#DD0031' },
     ],
     orbit2: [
       { name: 'Node.js', icon: <SiNodedotjs />, color: '#339933' },
+      { name: 'Python', icon: <SiPython />, color: '#3776AB' },
       { name: 'MongoDB', icon: <SiMongodb />, color: '#47A248' },
       { name: 'PostgreSQL', icon: <SiPostgresql />, color: '#4169E1' },
-      { name: 'GraphQL', icon: <SiGraphql />, color: '#E10098' },
-      { name: 'Rust', icon: <SiRust />, color: '#000000' },
+      { name: 'FastAPI', icon: <SiFastapi />, color: '#009688' },
+      { name: 'Rust', icon: <SiRust />, color: '#FFFFFF' },
+      { name: 'Django', icon: <SiDjango />, color: '#092E20' },
     ],
     orbit3: [
       { name: 'Docker', icon: <SiDocker />, color: '#2496ED' },
       { name: 'Git', icon: <SiGit />, color: '#F05032' },
-      { name: 'GitHub', icon: <SiGithub />, color: '#181717' },
       { name: 'AWS', icon: <SiAmazon />, color: '#FF9900' },
       { name: 'Linux', icon: <SiLinux />, color: '#FCC624' },
       { name: 'Firebase', icon: <SiFirebase />, color: '#FFCA28' },
-      { name: 'VS Code', icon: '💻', color: '#007ACC' },
-      { name: 'Webpack', icon: <SiWebpack />, color: '#8DD6F9' },
+      { name: 'Redis', icon: <SiRedis />, color: '#DC382D' },
+      { name: 'MySQL', icon: <SiMysql />, color: '#4479A1' },
       { name: 'NPM', icon: <SiNpm />, color: '#CB3837' },
-      { name: 'Figma', icon: <SiFigma />, color: '#F24E1E' },
     ],
   };
 
-  // Skills Data for Detail Tabs
+  // Updated Skills Data with distinct icons
   const skillsData = {
-    frontend: {
+    languages: {
       icon: Code,
       color: 'blue',
+      title: 'Programming Languages',
       skills: [
-        { name: 'React.js', level: 90, icon: <SiReact style={{ color: '#61DAFB' }} /> },
-        { name: 'JavaScript', level: 85, icon: <SiJavascript style={{ color: '#F7DF1E' }} /> },
-        { name: 'TypeScript', level: 80, icon: <SiTypescript style={{ color: '#3178C6' }} /> },
+        { name: 'JavaScript', level: 90, icon: <SiJavascript style={{ color: '#F7DF1E' }} /> },
+        { name: 'TypeScript', level: 85, icon: <SiTypescript style={{ color: '#3178C6' }} /> },
+        { name: 'Python', level: 88, icon: <SiPython style={{ color: '#3776AB' }} /> },
+        { name: 'Rust', level: 75, icon: <SiRust style={{ color: '#FFFFFF' }} /> },
+        { name: 'C', level: 70, icon: <SiC style={{ color: '#A8B9CC' }} /> },
+      ]
+    },
+    frontend: {
+      icon: Code,
+      color: 'cyan',
+      title: 'Frontend Development',
+      skills: [
+        { name: 'React.js', level: 92, icon: <SiReact style={{ color: '#61DAFB' }} /> },
+        { name: 'Next.js', level: 85, icon: <SiNextdotjs style={{ color: '#FFFFFF' }} /> },
+        { name: 'Angular', level: 78, icon: <SiAngular style={{ color: '#DD0031' }} /> },
+        { name: 'Flutter', level: 80, icon: <SiFlutter style={{ color: '#02569B' }} /> },
         { name: 'Tailwind CSS', level: 90, icon: <SiTailwindcss style={{ color: '#06B6D4' }} /> },
-        { name: 'Next.js', level: 75, icon: <SiNextdotjs style={{ color: '#000000' }} /> },
         { name: 'HTML5/CSS3', level: 95, icon: <SiHtml5 style={{ color: '#E34F26' }} /> },
       ]
     },
     backend: {
-      icon: Database,
+      icon: Server,
       color: 'green',
+      title: 'Backend & APIs',
       skills: [
-        { name: 'Node.js', level: 85, icon: <SiNodedotjs style={{ color: '#339933' }} /> },
-        { name: 'Express.js', level: 80, icon: '🚂' },
-        { name: 'MongoDB', level: 75, icon: <SiMongodb style={{ color: '#47A248' }} /> },
-        { name: 'PostgreSQL', level: 70, icon: <SiPostgresql style={{ color: '#4169E1' }} /> },
-        { name: 'REST APIs', level: 85, icon: '🔌' },
-        { name: 'GraphQL', level: 65, icon: <SiGraphql style={{ color: '#E10098' }} /> },
+        { name: 'Node.js', level: 90, icon: <SiNodedotjs style={{ color: '#339933' }} /> },
+        { name: 'Express.js', level: 88, icon: '⚡' },
+        { name: 'FastAPI', level: 85, icon: <SiFastapi style={{ color: '#009688' }} /> },
+        { name: 'Django', level: 80, icon: <SiDjango style={{ color: '#092E20' }} /> },
+        { name: 'REST APIs', level: 92, icon: '🔌' },
+        { name: 'GraphQL', level: 75, icon: <SiGraphql style={{ color: '#E10098' }} /> },
       ]
     },
-    tools: {
-      icon: Wrench,
+    database: {
+      icon: HardDrive,
       color: 'purple',
+      title: 'Databases',
       skills: [
-        { name: 'Git & GitHub', level: 90, icon: <SiGithub style={{ color: '#181717' }} /> },
-        { name: 'VS Code', level: 95, icon: '💻' },
-        { name: 'Docker', level: 60, icon: <SiDocker style={{ color: '#2496ED' }} /> },
-        { name: 'Webpack', level: 70, icon: <SiWebpack style={{ color: '#8DD6F9' }} /> },
-        { name: 'NPM/Yarn', level: 85, icon: <SiNpm style={{ color: '#CB3837' }} /> },
-        { name: 'Figma', level: 75, icon: <SiFigma style={{ color: '#F24E1E' }} /> },
+        { name: 'MongoDB', level: 85, icon: <SiMongodb style={{ color: '#47A248' }} /> },
+        { name: 'PostgreSQL', level: 82, icon: <SiPostgresql style={{ color: '#4169E1' }} /> },
+        { name: 'MySQL', level: 80, icon: <SiMysql style={{ color: '#4479A1' }} /> },
+        { name: 'Redis', level: 75, icon: <SiRedis style={{ color: '#DC382D' }} /> },
       ]
     },
-    other: {
-      icon: Cloud,
+    devops: {
+      icon: Wrench,
       color: 'orange',
+      title: 'DevOps & Tools',
       skills: [
-        { name: 'AWS', level: 65, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
-        { name: 'Firebase', level: 70, icon: <SiFirebase style={{ color: '#FFCA28' }} /> },
-        { name: 'Linux', level: 75, icon: <SiLinux style={{ color: '#FCC624' }} /> },
-        { name: 'CI/CD', level: 60, icon: '🔄' },
-        { name: 'Responsive Design', level: 90, icon: '📱' },
-        { name: 'Performance Optimization', level: 80, icon: '⚡' },
+        { name: 'Docker', level: 85, icon: <SiDocker style={{ color: '#2496ED' }} /> },
+        { name: 'Git & GitHub', level: 95, icon: <SiGithub style={{ color: '#FFFFFF' }} /> },
+        { name: 'NPM', level: 90, icon: <SiNpm style={{ color: '#CB3837' }} /> },
+        { name: 'Webpack', level: 75, icon: <SiWebpack style={{ color: '#8DD6F9' }} /> },
+        { name: 'VS Code', level: 95, icon: '💻' },
+        { name: 'Linux', level: 88, icon: <SiLinux style={{ color: '#FCC624' }} /> },
+      ]
+    },
+    cloud: {
+      icon: Cloud,
+      color: 'yellow',
+      title: 'Cloud & Infrastructure',
+      skills: [
+        { name: 'AWS EC2', level: 80, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
+        { name: 'AWS Lambda', level: 75, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
+        { name: 'AWS RDS', level: 78, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
+        { name: 'AWS S3', level: 85, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
+        { name: 'Route 53', level: 70, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
+        { name: 'Firebase', level: 80, icon: <SiFirebase style={{ color: '#FFCA28' }} /> },
+      ]
+    },
+    security: {
+      icon: Shield,
+      color: 'red',
+      title: 'Cybersecurity & Pentesting',
+      skills: [
+        { name: 'Burp Suite', level: 85, icon: '🔒' },
+        { name: 'OWASP ZAP', level: 80, icon: '🛡️' },
+        { name: 'Metasploit', level: 78, icon: '💣' },
+        { name: 'Nmap', level: 90, icon: '🗺️' },
+        { name: 'Wireshark', level: 82, icon: '🦈' },
+        { name: 'SQLMap', level: 80, icon: '💉' },
+        { name: 'Nikto', level: 75, icon: '🔍' },
+        { name: 'Hydra', level: 78, icon: '🔐' },
+        { name: 'John the Ripper', level: 75, icon: '🔓' },
+        { name: 'Gobuster', level: 80, icon: '📂' },
+        { name: 'FFUF', level: 78, icon: '⚡' },
+        { name: 'Netcat', level: 85, icon: '🐱' },
+      ]
+    },
+    ai: {
+      icon: Code,
+      color: 'pink',
+      title: 'AI & ML Tools',
+      skills: [
+        { name: 'ChatGPT API', level: 85, icon: '🤖' },
+        { name: 'OpenAI Models', level: 80, icon: '🧠' },
+        { name: 'Hugging Face', level: 75, icon: '🤗' },
+        { name: 'LangChain', level: 78, icon: '⛓️' },
+        { name: 'TensorFlow', level: 70, icon: '🔥' },
+        { name: 'PyTorch', level: 72, icon: '🔦' },
       ]
     }
   };
 
   const categories = [
     { id: 'home', name: 'Home', icon: HomeIcon },
+    { id: 'languages', name: 'Languages', icon: Code },
     { id: 'frontend', name: 'Frontend', icon: Code },
-    { id: 'backend', name: 'Backend', icon: Database },
-    { id: 'tools', name: 'Tools & DevOps', icon: Wrench },
-    { id: 'other', name: 'Other', icon: Cloud },
+    { id: 'backend', name: 'Backend', icon: Server },
+    { id: 'database', name: 'Databases', icon: HardDrive },
+    { id: 'devops', name: 'DevOps', icon: Wrench },
+    { id: 'cloud', name: 'Cloud/AWS', icon: Cloud },
+    { id: 'security', name: 'Security', icon: Shield },
+    { id: 'ai', name: 'AI/ML', icon: Code },
   ];
 
   const handleMaximize = () => {
@@ -142,19 +214,37 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
 
   const getColorClass = (category) => {
     const colors = {
-      frontend: 'blue',
+      languages: 'blue',
+      frontend: 'cyan',
       backend: 'green',
-      tools: 'purple',
-      other: 'orange'
+      database: 'purple',
+      devops: 'orange',
+      cloud: 'yellow',
+      security: 'red',
+      ai: 'pink'
     };
     return colors[category] || 'blue';
+  };
+
+  const getGradient = (color) => {
+    const gradients = {
+      blue: 'from-blue-500 to-blue-600',
+      cyan: 'from-cyan-500 to-cyan-600',
+      green: 'from-green-500 to-green-600',
+      purple: 'from-purple-500 to-purple-600',
+      orange: 'from-orange-500 to-orange-600',
+      yellow: 'from-yellow-500 to-yellow-600',
+      red: 'from-red-500 to-red-600',
+      pink: 'from-pink-500 to-pink-600',
+    };
+    return gradients[color] || gradients.blue;
   };
 
   // Arc Orbiting Skills Component
   const ArcOrbitSkills = () => {
     return (
       <div className="absolute bottom-0 left-0 right-0 h-96 overflow-hidden pointer-events-none">
-        {/* Orbit 1 - Inner Arc (Frontend) */}
+        {/* Orbit 1 */}
         <div
           className="absolute left-1/2 -translate-x-1/2"
           style={{ width: '500px', height: '500px', bottom: '-380px' }}
@@ -175,7 +265,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
             className="absolute inset-0"
             style={{ transformOrigin: '50% 50%' }}
             animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 350, ease: 'linear' }}
+            transition={{ repeat: Infinity, duration: 50, ease: 'linear' }}
           >
             {orbitSkills.orbit1.map((skill, i) => {
               const angle = (i / (orbitSkills.orbit1.length - 1)) * 180;
@@ -207,7 +297,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
           </motion.div>
         </div>
 
-        {/* Orbit 2 - Middle Arc (Backend) */}
+        {/* Orbit 2 */}
         <div
           className="absolute left-1/2 -translate-x-1/2"
           style={{ width: '700px', height: '700px', bottom: '-460px' }}
@@ -228,7 +318,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
             className="absolute inset-0"
             style={{ transformOrigin: '50% 50%' }}
             animate={{ rotate: -360 }}
-            transition={{ repeat: Infinity, duration: 480, ease: 'linear' }}
+            transition={{ repeat: Infinity, duration: 70, ease: 'linear' }}
           >
             {orbitSkills.orbit2.map((skill, i) => {
               const angle = (i / (orbitSkills.orbit2.length - 1)) * 180;
@@ -260,7 +350,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
           </motion.div>
         </div>
 
-        {/* Orbit 3 - Outer Arc (Tools) */}
+        {/* Orbit 3 */}
         <div
           className="absolute left-1/2 -translate-x-1/2"
           style={{ width: '900px', height: '900px', bottom: '-540px' }}
@@ -281,7 +371,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
             className="absolute inset-0"
             style={{ transformOrigin: '50% 50%' }}
             animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 790, ease: 'linear' }}
+            transition={{ repeat: Infinity, duration: 90, ease: 'linear' }}
           >
             {orbitSkills.orbit3.map((skill, i) => {
               const angle = (i / (orbitSkills.orbit3.length - 1)) * 180;
@@ -379,7 +469,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
         {/* Content */}
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
-          <div className="w-56 bg-gray-800 border-r border-gray-700 p-4">
+          <div className="w-56 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto">
             <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Categories</h3>
             <div className="space-y-1">
               {categories.map(category => {
@@ -406,14 +496,10 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
           <div className="flex-1 overflow-hidden bg-gray-900 relative">
             {selectedCategory === 'home' ? (
               <div className="h-full flex flex-col relative">
-                {/* Text block */}
                 <div className="pt-10 px-8 pb-8 flex flex-col items-start text-left z-10">
                   <h1 className="text-5xl font-bold text-white mb-4">My Skills</h1>
                   <p className="text-gray-200 text-lg max-w-3xl leading-relaxed mb-6">
-                    I'm a Full Stack Developer with a strong foundation in building scalable web applications. 
-                    Currently making an exciting career transformation into Cybersecurity, combining my development 
-                    expertise with security principles. My unique blend of skills allows me to build secure, 
-                    robust applications while understanding both the developer and security perspectives.
+                    I'm a Full Stack Developer with a strong foundation in building scalable web applications and mobile backends. With a solid grasp of cybersecurity principles and secure coding practices, I focus on writing clean, reliable code while designing systems that are resilient to real‑world threats. My experience across frontend, backend, and security allows me to build and protect robust applications end‑to‑end.
                   </p>
                   <motion.button
                     className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold rounded-full shadow-lg hover:shadow-yellow-500/50 transition-shadow"
@@ -423,47 +509,75 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
                     Contact Me
                   </motion.button>
                 </div>
-
                 <div className="flex-1" />
                 <ArcOrbitSkills />
               </div>
             ) : (
-              <div className="p-6 overflow-auto h-full">
-                <div className="grid grid-cols-2 gap-6">
-                  {skillsData[selectedCategory]?.skills.map((skill, index) => {
-                    const color = getColorClass(selectedCategory);
-                    const barColor =
-                      color === 'blue' ? '#3b82f6'
-                        : color === 'green' ? '#10b981'
-                        : color === 'purple' ? '#a855f7'
-                        : '#f97316';
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedCategory}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-6 overflow-auto h-full"
+                >
+                  {/* Category Header */}
+                  <div className={`mb-6 p-4 rounded-xl bg-gradient-to-r ${getGradient(getColorClass(selectedCategory))}`}>
+                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                      {React.createElement(skillsData[selectedCategory]?.icon, { size: 28 })}
+                      {skillsData[selectedCategory]?.title}
+                    </h2>
+                  </div>
 
-                    return (
-                      <div
-                        key={index}
-                        className="bg-gray-800 rounded-xl p-5 border border-gray-700 hover:border-gray-600 transition-all hover:shadow-lg"
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{skill.icon}</span>
-                            <h3 className="text-white font-medium">{skill.name}</h3>
+                  {/* Skills Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {skillsData[selectedCategory]?.skills.map((skill, index) => {
+                      const color = getColorClass(selectedCategory);
+                      const barColors = {
+                        blue: '#3b82f6',
+                        cyan: '#06b6d4',
+                        green: '#10b981',
+                        purple: '#a855f7',
+                        orange: '#f97316',
+                        yellow: '#eab308',
+                        red: '#ef4444',
+                        pink: '#ec4899',
+                      };
+
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="bg-gray-800 rounded-xl p-4 border border-gray-700 hover:border-gray-600 transition-all hover:shadow-lg hover:shadow-gray-700/50"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{skill.icon}</span>
+                              <h3 className="text-white font-medium text-sm">{skill.name}</h3>
+                            </div>
+                            <span className="text-xs font-semibold text-gray-400">
+                              {skill.level}%
+                            </span>
                           </div>
-                          <span className="text-sm font-semibold text-gray-400">
-                            {skill.level}%
-                          </span>
-                        </div>
 
-                        <div className="relative w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            className="absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out"
-                            style={{ width: `${skill.level}%`, background: barColor }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                          <div className="relative w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${skill.level}%` }}
+                              transition={{ duration: 1, delay: index * 0.05, ease: 'easeOut' }}
+                              className="absolute top-0 left-0 h-full rounded-full"
+                              style={{ background: barColors[color] }}
+                            />
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             )}
           </div>
         </div>
