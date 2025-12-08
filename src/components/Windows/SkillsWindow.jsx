@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive } from 'lucide-react';
+import { X, Minus, Maximize2, Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive, FileCode, Layout } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SiReact,
@@ -32,6 +32,7 @@ import {
   SiRedis,
   SiFastapi,
   SiDjango,
+  SiGooglecloud,
 } from 'react-icons/si';
 
 const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 160, offsetY = 90, onFocus }) => {
@@ -78,7 +79,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
   // Updated Skills Data with distinct icons
   const skillsData = {
     languages: {
-      icon: Code,
+      icon: FileCode,
       color: 'blue',
       title: 'Programming Languages',
       skills: [
@@ -90,7 +91,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
       ]
     },
     frontend: {
-      icon: Code,
+      icon: Layout,
       color: 'cyan',
       title: 'Frontend Development',
       skills: [
@@ -150,6 +151,12 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
         { name: 'AWS S3', level: 85, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
         { name: 'Route 53', level: 70, icon: <SiAmazon style={{ color: '#FF9900' }} /> },
         { name: 'Firebase', level: 80, icon: <SiFirebase style={{ color: '#FFCA28' }} /> },
+        { name: 'Google Cloud', level: 75, icon: <SiGooglecloud style={{ color: '#4285F4' }} /> },
+        { name: 'Google Maps API', level: 82, icon: '🗺️' },
+        { name: 'Google Auth', level: 85, icon: '🔐' },
+        { name: 'Cloud Functions', level: 78, icon: '⚡' },
+        { name: 'Cloud Storage', level: 80, icon: '☁️' },
+        { name: 'Google APIs', level: 83, icon: '🔌' },
       ]
     },
     security: {
@@ -180,20 +187,20 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
         { name: 'OpenAI Models', level: 80, icon: '🧠' },
         { name: 'Hugging Face', level: 75, icon: '🤗' },
         { name: 'LangChain', level: 78, icon: '⛓️' },
-        { name: 'TensorFlow', level: 70, icon: '🔥' },
-        { name: 'PyTorch', level: 72, icon: '🔦' },
+        { name: 'TensorFlow', level: 20, icon: '🔥' },
+        { name: 'PyTorch', level: 20, icon: '🔦' },
       ]
     }
   };
 
   const categories = [
     { id: 'home', name: 'Home', icon: HomeIcon },
-    { id: 'languages', name: 'Languages', icon: Code },
-    { id: 'frontend', name: 'Frontend', icon: Code },
+    { id: 'languages', name: 'Languages', icon: FileCode },
+    { id: 'frontend', name: 'Frontend', icon: Layout },
     { id: 'backend', name: 'Backend', icon: Server },
     { id: 'database', name: 'Databases', icon: HardDrive },
     { id: 'devops', name: 'DevOps', icon: Wrench },
-    { id: 'cloud', name: 'Cloud/AWS', icon: Cloud },
+    { id: 'cloud', name: 'Cloud/AWS/GCP', icon: Cloud },
     { id: 'security', name: 'Security', icon: Shield },
     { id: 'ai', name: 'AI/ML', icon: Code },
   ];
