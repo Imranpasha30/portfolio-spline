@@ -175,7 +175,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
             className="absolute inset-0"
             style={{ transformOrigin: '50% 50%' }}
             animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 30, ease: 'linear' }}
+            transition={{ repeat: Infinity, duration: 350, ease: 'linear' }}
           >
             {orbitSkills.orbit1.map((skill, i) => {
               const angle = (i / (orbitSkills.orbit1.length - 1)) * 180;
@@ -228,7 +228,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
             className="absolute inset-0"
             style={{ transformOrigin: '50% 50%' }}
             animate={{ rotate: -360 }}
-            transition={{ repeat: Infinity, duration: 40, ease: 'linear' }}
+            transition={{ repeat: Infinity, duration: 480, ease: 'linear' }}
           >
             {orbitSkills.orbit2.map((skill, i) => {
               const angle = (i / (orbitSkills.orbit2.length - 1)) * 180;
@@ -281,7 +281,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
             className="absolute inset-0"
             style={{ transformOrigin: '50% 50%' }}
             animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 55, ease: 'linear' }}
+            transition={{ repeat: Infinity, duration: 790, ease: 'linear' }}
           >
             {orbitSkills.orbit3.map((skill, i) => {
               const angle = (i / (orbitSkills.orbit3.length - 1)) * 180;
