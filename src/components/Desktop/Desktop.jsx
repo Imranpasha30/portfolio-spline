@@ -7,6 +7,7 @@ import SkillsWindow from '../Windows/SkillsWindow';
 import MailWindow from '../Windows/MailWindow';
 import VSCodeWindow from '../Windows/VSCodeWindow';
 import SettingsWindow from '../Windows/SettingsWindow';
+import BrowserWindow from '../Windows/BrowserWindow';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Terminal, FolderOpen, Rocket, User, Lightbulb, Grid3x3, 
@@ -30,6 +31,7 @@ const Desktop = () => {
     const [mails, setMails] = useState([]);
     const [vscodes, setVSCodes] = useState([]);
     const [settings, setSettings] = useState([]);
+    const [browsers, setBrowsers] = useState([]);
     const [maxZIndex, setMaxZIndex] = useState(40);
     const [windowOffset, setWindowOffset] = useState(0);
     const [showApplications, setShowApplications] = useState(false);
@@ -81,7 +83,44 @@ const Desktop = () => {
             setSettings(prev => prev.map(s =>
                 s.id === windowId ? { ...s, zIndex: newZIndex } : s
             ));
+        } else if (windowType === 'browser') {
+            setBrowsers(prev => prev.map(b =>
+                b.id === windowId ? { ...b, zIndex: newZIndex } : b
+            ));
         }
+    };
+
+    // Browser handlers
+    const handleBrowserOpen = () => {
+        const offset = windowOffset % 5;
+        const newBrowser = {
+            id: Date.now(),
+            isMinimized: false,
+            zIndex: maxZIndex + 1,
+            offsetX: 150 + (offset * 30),
+            offsetY: 80 + (offset * 30)
+        };
+        setMaxZIndex(maxZIndex + 1);
+        setWindowOffset(windowOffset + 1);
+        setBrowsers(prev => [...prev, newBrowser]);
+    };
+
+    const handleBrowserClose = (id) => {
+        setBrowsers(prev => prev.filter(b => b.id !== id));
+    };
+
+    const handleBrowserMinimize = (id) => {
+        setBrowsers(prev => prev.map(b =>
+            b.id === id ? { ...b, isMinimized: true } : b
+        ));
+    };
+
+    const handleBrowserRestore = (id) => {
+        const newZIndex = maxZIndex + 1;
+        setMaxZIndex(newZIndex);
+        setBrowsers(prev => prev.map(b =>
+            b.id === id ? { ...b, isMinimized: false, zIndex: newZIndex } : b
+        ));
     };
 
     // Terminal handlers
@@ -368,7 +407,8 @@ const Desktop = () => {
         ...abouts.filter(a => a.isMinimized).map(a => ({ ...a, type: 'about', name: 'About' })),
         ...mails.filter(m => m.isMinimized).map(m => ({ ...m, type: 'mail', name: 'Mail' })),
         ...vscodes.filter(v => v.isMinimized).map(v => ({ ...v, type: 'vscode', name: 'VS Code' })),
-        ...settings.filter(s => s.isMinimized).map(s => ({ ...s, type: 'settings', name: 'Settings' }))
+        ...settings.filter(s => s.isMinimized).map(s => ({ ...s, type: 'settings', name: 'Settings' })),
+        ...browsers.filter(b => b.isMinimized).map(b => ({ ...b, type: 'browser', name: 'Firefox' }))
     ];
 
     const handleRestoreWindow = (id, type) => {
@@ -380,6 +420,7 @@ const Desktop = () => {
         else if (type === 'mail') handleMailRestore(id);
         else if (type === 'vscode') handleVSCodeRestore(id);
         else if (type === 'settings') handleSettingsRestore(id);
+        else if (type === 'browser') handleBrowserRestore(id);
     };
 
     const formatTime = (date) => {
@@ -395,7 +436,7 @@ const Desktop = () => {
 
     return (
         <div className="relative w-screen h-screen overflow-hidden">
-            {/* Ubuntu Wallpaper - NO GRADIENT */}
+            {/* Ubuntu Wallpaper */}
             <div 
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
                 style={{
@@ -444,6 +485,7 @@ const Desktop = () => {
                 onMailClick={handleMailOpen}
                 onVSCodeClick={handleVSCodeOpen}
                 onSettingsClick={handleSettingsOpen}
+                onBrowserClick={handleBrowserOpen}
                 minimizedWindows={allMinimizedWindows}
                 onShowApplications={() => setShowApplications(!showApplications)}
                 launcherColor={launcherColor}
@@ -453,25 +495,40 @@ const Desktop = () => {
             <div className="absolute inset-0 pt-7 pl-16">
                 <div className="relative w-full h-full">
                     {terminals.map(terminal => (
-    <TerminalWindow
-        key={terminal.id}
-        id={terminal.id}
-        isMinimized={terminal.isMinimized}
-        zIndex={terminal.zIndex}
-        offsetX={terminal.offsetX}
-        offsetY={terminal.offsetY}
-        onClose={() => handleTerminalClose(terminal.id)}
-        onMinimize={() => handleTerminalMinimize(terminal.id)}
-        onProjectsOpen={handleProjectsOpen}
-        onSkillsOpen={handleSkillsOpen}
-        onAboutOpen={handleAboutOpen}
-        onMailOpen={handleMailOpen}
-        onFileManagerOpen={handleFileManagerOpen}
-        onVSCodeOpen={handleVSCodeOpen}
-        onSettingsOpen={handleSettingsOpen}
-        onFocus={() => bringToFront(terminal.id, 'terminal')}
-    />
-))}
+                        <TerminalWindow
+                            key={terminal.id}
+                            id={terminal.id}
+                            isMinimized={terminal.isMinimized}
+                            zIndex={terminal.zIndex}
+                            offsetX={terminal.offsetX}
+                            offsetY={terminal.offsetY}
+                            onClose={() => handleTerminalClose(terminal.id)}
+                            onMinimize={() => handleTerminalMinimize(terminal.id)}
+                            onProjectsOpen={handleProjectsOpen}
+                            onSkillsOpen={handleSkillsOpen}
+                            onAboutOpen={handleAboutOpen}
+                            onMailOpen={handleMailOpen}
+                            onFileManagerOpen={handleFileManagerOpen}
+                            onVSCodeOpen={handleVSCodeOpen}
+                            onSettingsOpen={handleSettingsOpen}
+                            onBrowserOpen={handleBrowserOpen}
+                            onFocus={() => bringToFront(terminal.id, 'terminal')}
+                        />
+                    ))}
+
+                    {browsers.map(browser => (
+                        <BrowserWindow
+                            key={browser.id}
+                            id={browser.id}
+                            isMinimized={browser.isMinimized}
+                            zIndex={browser.zIndex}
+                            offsetX={browser.offsetX}
+                            offsetY={browser.offsetY}
+                            onClose={() => handleBrowserClose(browser.id)}
+                            onMinimize={() => handleBrowserMinimize(browser.id)}
+                            onFocus={() => bringToFront(browser.id, 'browser')}
+                        />
+                    ))}
 
                     {fileManagers.map(fm => (
                         <FileManagerWindow
@@ -593,6 +650,7 @@ const Desktop = () => {
                         onMailClick={() => { handleMailOpen(); setShowApplications(false); }}
                         onVSCodeClick={() => { handleVSCodeOpen(); setShowApplications(false); }}
                         onSettingsClick={() => { handleSettingsOpen(); setShowApplications(false); }}
+                        onBrowserClick={() => { handleBrowserOpen(); setShowApplications(false); }}
                     />
                 )}
             </AnimatePresence>
@@ -610,6 +668,7 @@ const UbuntuLauncher = ({
     onMailClick,
     onVSCodeClick,
     onSettingsClick,
+    onBrowserClick,
     minimizedWindows,
     onShowApplications,
     launcherColor
@@ -622,12 +681,12 @@ const UbuntuLauncher = ({
 
     const launcherItems = [
         { id: 'grid', name: 'Show Applications', icon: Grid3x3, onClick: onShowApplications, special: true },
+        { id: 'firefox', name: 'Firefox', isImage: true, imageSrc: firefoxLogo, onClick: onBrowserClick, type: 'browser' },
         { id: 'files', name: 'Files', isImage: true, onClick: onFileManagerClick, imageSrc: folder, type: 'filemanager' },
         { id: 'skills', name: 'Skills', icon: Lightbulb, onClick: onSkillsClick, type: 'skills', color: 'bg-yellow-500' },
         { id: 'projects', name: 'Projects', icon: Rocket, onClick: onProjectsClick, type: 'projects', color: 'bg-purple-500' },
         { id: 'about', name: 'About', icon: User, onClick: onAboutClick, type: 'about', color: 'bg-green-500' },
         { id: 'terminal', name: 'Terminal', icon: Terminal, onClick: onTerminalClick, type: 'terminal', color: 'bg-gray-700' },
-        { id: 'firefox', name: 'Firefox', isImage: true, imageSrc: firefoxLogo },
         { id: 'mail', name: 'Mail', isImage: true, imageSrc: mail, onClick: onMailClick, type: 'mail' },
         { id: 'code', name: 'VS Code', isImage: true, imageSrc: vs, onClick: onVSCodeClick, type: 'vscode' },
         { id: 'settings', name: 'Settings', icon: Settings, onClick: onSettingsClick, type: 'settings', color: 'bg-gray-600' },
@@ -683,7 +742,7 @@ const UbuntuLauncher = ({
                     )}
                 </button>
 
-                {/* Running Indicator (Orange Dot) */}
+                {/* Running Indicator */}
                 {running && !item.special && (
                     <motion.div
                         initial={{ scale: 0 }}
@@ -730,11 +789,12 @@ const ApplicationsGrid = ({
     onAboutClick,
     onMailClick,
     onVSCodeClick,
-    onSettingsClick
+    onSettingsClick,
+    onBrowserClick
 }) => {
     const apps = [
+        { name: 'Firefox', isImage: true, imageSrc: firefoxLogo, onClick: onBrowserClick },
         { name: 'Files', isImage: true, imageSrc: folder, onClick: onFileManagerClick },
-        { name: 'Firefox', isImage: true, imageSrc: firefoxLogo },
         { name: 'Terminal', icon: Terminal, onClick: onTerminalClick, color: 'bg-gray-700' },
         { name: 'Skills', icon: Lightbulb, onClick: onSkillsClick, color: 'bg-yellow-500' },
         { name: 'Projects', icon: Rocket, onClick: onProjectsClick, color: 'bg-purple-500' },

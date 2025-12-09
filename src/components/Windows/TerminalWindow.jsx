@@ -318,6 +318,17 @@ const TerminalWindow = ({
                 }
                 break;
 
+            case 'firefox':
+case 'browser':
+    if (onBrowserOpen) {
+        onBrowserOpen();
+        setHistory(prev => [...prev,
+            { type: 'output', content: '🌐 Opening Firefox browser...' }
+        ]);
+    }
+    break;
+            
+
             case 'contact':
                 setHistory(prev => [...prev,
                     { type: 'output', content: '╔═══════════════════ CONTACT INFO ═══════════════════╗' },
@@ -350,6 +361,8 @@ const TerminalWindow = ({
             case '':
                 // Just add empty line
                 break;
+
+            
 
             default:
                 setHistory(prev => [...prev,
