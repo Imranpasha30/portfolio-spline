@@ -355,7 +355,7 @@ const BrowserWindow = ({
 
                 {/* Status Bar - Dark */}
                 <div className="flex items-center justify-between bg-gray-800 px-3 py-1 border-t border-gray-700 text-xs text-gray-400">
-                    <span>{isLoading ? '⏳ Loading...' : '✅ Ready'}</span>
+                  
                     <span className="truncate max-w-md">
                         {currentTab.url === 'about:home' ? `${currentTab.name} Home` : currentTab.name}
                     </span>
