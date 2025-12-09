@@ -20,7 +20,7 @@ import trashIcon from '/images/trash.png';
 import folder from '/images/folder.png';
 import vs from '/images/vs.png';
 import mail from '/images/mail.png';
-import ubuntuWallpaper from '/images/ubuntu-22-04-5-lts-3840x2160-23443.png';
+import ubuntuWallpaper from '/wallpaper/fa993d401b720ad6599ff38a9cc62851fefaff17.jpeg';
 
 const Desktop = () => {
     const [terminals, setTerminals] = useState([]);

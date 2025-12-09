@@ -8,7 +8,7 @@ import { HexColorPicker } from 'react-colorful';
 // Import wallpapers
 import wallpaper1 from '/wallpaper/0921cb27d5604b464218a64ae88a3f43c7b7371a.png';
 import wallpaper2 from '/wallpaper/ubuntucircuitry-logotip-metal-logo-linux-style-linuks-ubuntu.jpg';
-import wallpaper3 from '/wallpaper/fa993d401b720ad6599ff38a9cc62851fefaff17.jpeg';
+import wallpaper3 from '/images/ubuntu-22-04-5-lts-3840x2160-23443.png';
 import wallpaper4 from '/wallpaper/19a97b1db5709c9a0cdaf408adfcc1b3325c74c6_2_690x388.jpeg';
 import wallpaper5 from '/wallpaper/ubuntu-24-04-noble-numbat-jpg.webp';
 
