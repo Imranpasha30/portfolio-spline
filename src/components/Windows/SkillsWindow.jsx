@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Rnd } from 'react-rnd';
 import { X, Minus, Maximize2, Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive, FileCode, Layout } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,15 +35,8 @@ import {
   SiGooglecloud,
 } from 'react-icons/si';
 
-const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 160, offsetY = 90, onFocus }) => {
-  const [isMaximized, setIsMaximized] = useState(false);
-  const [previousSize, setPreviousSize] = useState({ width: 1100, height: 700, x: 160, y: 90 });
-  const [size, setSize] = useState({ width: 1100, height: 700 });
-  const [position, setPosition] = useState({ x: offsetX, y: offsetY });
-  const [selectedCategory, setSelectedCategory] = useState('home');
-  const rndRef = useRef(null);
-
-  // Skills Data for Orbiting Animation
+// Move ArcOrbitSkills OUTSIDE as a separate memoized component
+const ArcOrbitSkills = React.memo(() => {
   const orbitSkills = {
     orbit1: [
       { name: 'React', icon: <SiReact />, color: '#61DAFB' },
@@ -76,8 +69,182 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
     ],
   };
 
-  // Updated Skills Data with distinct icons
-  const skillsData = {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 h-96 overflow-hidden pointer-events-none">
+      {/* Orbit 1 */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{ width: '500px', height: '500px', bottom: '-380px' }}
+      >
+        <svg className="absolute inset-0 w-full h-full">
+          <circle
+            cx="250"
+            cy="250"
+            r="248"
+            fill="none"
+            stroke="rgba(59, 130, 246, 0.3)"
+            strokeWidth="2"
+            strokeDasharray="5,5"
+          />
+        </svg>
+
+        <motion.div
+          className="absolute inset-0"
+          style={{ transformOrigin: '50% 50%' }}
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 50, ease: 'linear' }}
+        >
+          {orbitSkills.orbit1.map((skill, i) => {
+            const angle = (i / (orbitSkills.orbit1.length - 1)) * 180;
+            const radius = 248;
+            const x = Math.cos((angle * Math.PI) / 180) * radius;
+            const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+            return (
+              <div
+                key={skill.name}
+                className="absolute"
+                style={{
+                  left: `calc(50% + ${x}px)`,
+                  top: `calc(50% - ${y}px)`,
+                }}
+              >
+                <motion.div
+                  className="w-14 h-14 bg-gray-800 border-2 border-blue-500 rounded-xl flex flex-col items-center justify-center shadow-lg -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+                  whileHover={{ scale: 1.15 }}
+                >
+                  <span className="text-xl" style={{ color: skill.color }}>{skill.icon}</span>
+                  <span className="text-[8px] font-semibold text-white mt-0.5">
+                    {skill.name}
+                  </span>
+                </motion.div>
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      {/* Orbit 2 */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{ width: '700px', height: '700px', bottom: '-460px' }}
+      >
+        <svg className="absolute inset-0 w-full h-full">
+          <circle
+            cx="350"
+            cy="350"
+            r="348"
+            fill="none"
+            stroke="rgba(16, 185, 129, 0.3)"
+            strokeWidth="2"
+            strokeDasharray="5,5"
+          />
+        </svg>
+
+        <motion.div
+          className="absolute inset-0"
+          style={{ transformOrigin: '50% 50%' }}
+          animate={{ rotate: -360 }}
+          transition={{ repeat: Infinity, duration: 70, ease: 'linear' }}
+        >
+          {orbitSkills.orbit2.map((skill, i) => {
+            const angle = (i / (orbitSkills.orbit2.length - 1)) * 180;
+            const radius = 348;
+            const x = Math.cos((angle * Math.PI) / 180) * radius;
+            const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+            return (
+              <div
+                key={skill.name}
+                className="absolute"
+                style={{
+                  left: `calc(50% + ${x}px)`,
+                  top: `calc(50% - ${y}px)`,
+                }}
+              >
+                <motion.div
+                  className="w-13 h-13 bg-gray-800 border-2 border-green-500 rounded-xl flex flex-col items-center justify-center shadow-lg -translate-x-1/2 -translate-y-1/2 cursor-pointer px-2 py-2"
+                  whileHover={{ scale: 1.15 }}
+                >
+                  <span className="text-lg" style={{ color: skill.color }}>{skill.icon}</span>
+                  <span className="text-[7px] font-semibold text-white">
+                    {skill.name}
+                  </span>
+                </motion.div>
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      {/* Orbit 3 */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{ width: '900px', height: '900px', bottom: '-540px' }}
+      >
+        <svg className="absolute inset-0 w-full h-full">
+          <circle
+            cx="450"
+            cy="450"
+            r="448"
+            fill="none"
+            stroke="rgba(168, 85, 247, 0.3)"
+            strokeWidth="2"
+            strokeDasharray="5,5"
+          />
+        </svg>
+
+        <motion.div
+          className="absolute inset-0"
+          style={{ transformOrigin: '50% 50%' }}
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 90, ease: 'linear' }}
+        >
+          {orbitSkills.orbit3.map((skill, i) => {
+            const angle = (i / (orbitSkills.orbit3.length - 1)) * 180;
+            const radius = 448;
+            const x = Math.cos((angle * Math.PI) / 180) * radius;
+            const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+            return (
+              <div
+                key={skill.name}
+                className="absolute"
+                style={{
+                  left: `calc(50% + ${x}px)`,
+                  top: `calc(50% - ${y}px)`,
+                }}
+              >
+                <motion.div
+                  className="w-12 h-12 bg-gray-800 border-2 border-purple-500 rounded-xl flex flex-col items-center justify-center shadow-lg -translate-x-1/2 -translate-y-1/2 cursor-pointer px-1"
+                  whileHover={{ scale: 1.15 }}
+                >
+                  <span className="text-base" style={{ color: skill.color }}>{skill.icon}</span>
+                  <span className="text-[6px] font-semibold text-white text-center">
+                    {skill.name}
+                  </span>
+                </motion.div>
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </div>
+  );
+});
+
+ArcOrbitSkills.displayName = 'ArcOrbitSkills';
+
+const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 160, offsetY = 90, onFocus }) => {
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [previousSize, setPreviousSize] = useState({ width: 1100, height: 700, x: 160, y: 90 });
+  const [size, setSize] = useState({ width: 1100, height: 700 });
+  const [position, setPosition] = useState({ x: offsetX, y: offsetY });
+  const [selectedCategory, setSelectedCategory] = useState('home');
+  const rndRef = useRef(null);
+
+  // Memoize skills data so it doesn't recreate on every render
+  const skillsData = useMemo(() => ({
     languages: {
       icon: FileCode,
       color: 'blue',
@@ -191,9 +358,9 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
         { name: 'PyTorch', level: 20, icon: '🔦' },
       ]
     }
-  };
+  }), []);
 
-  const categories = [
+  const categories = useMemo(() => [
     { id: 'home', name: 'Home', icon: HomeIcon },
     { id: 'languages', name: 'Languages', icon: FileCode },
     { id: 'frontend', name: 'Frontend', icon: Layout },
@@ -203,7 +370,7 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
     { id: 'cloud', name: 'Cloud/AWS/GCP', icon: Cloud },
     { id: 'security', name: 'Security', icon: Shield },
     { id: 'ai', name: 'AI/ML', icon: Code },
-  ];
+  ], []);
 
   const handleMaximize = () => {
     if (!isMaximized) {
@@ -245,172 +412,6 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
       pink: 'from-pink-500 to-pink-600',
     };
     return gradients[color] || gradients.blue;
-  };
-
-  // Arc Orbiting Skills Component
-  const ArcOrbitSkills = () => {
-    return (
-      <div className="absolute bottom-0 left-0 right-0 h-96 overflow-hidden pointer-events-none">
-        {/* Orbit 1 */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{ width: '500px', height: '500px', bottom: '-380px' }}
-        >
-          <svg className="absolute inset-0 w-full h-full">
-            <circle
-              cx="250"
-              cy="250"
-              r="248"
-              fill="none"
-              stroke="rgba(59, 130, 246, 0.3)"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-          </svg>
-
-          <motion.div
-            className="absolute inset-0"
-            style={{ transformOrigin: '50% 50%' }}
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 50, ease: 'linear' }}
-          >
-            {orbitSkills.orbit1.map((skill, i) => {
-              const angle = (i / (orbitSkills.orbit1.length - 1)) * 180;
-              const radius = 248;
-              const x = Math.cos((angle * Math.PI) / 180) * radius;
-              const y = Math.sin((angle * Math.PI) / 180) * radius;
-
-              return (
-                <div
-                  key={skill.name}
-                  className="absolute"
-                  style={{
-                    left: `calc(50% + ${x}px)`,
-                    top: `calc(50% - ${y}px)`,
-                  }}
-                >
-                  <motion.div
-                    className="w-14 h-14 bg-gray-800 border-2 border-blue-500 rounded-xl flex flex-col items-center justify-center shadow-lg -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-                    whileHover={{ scale: 1.15 }}
-                  >
-                    <span className="text-xl" style={{ color: skill.color }}>{skill.icon}</span>
-                    <span className="text-[8px] font-semibold text-white mt-0.5">
-                      {skill.name}
-                    </span>
-                  </motion.div>
-                </div>
-              );
-            })}
-          </motion.div>
-        </div>
-
-        {/* Orbit 2 */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{ width: '700px', height: '700px', bottom: '-460px' }}
-        >
-          <svg className="absolute inset-0 w-full h-full">
-            <circle
-              cx="350"
-              cy="350"
-              r="348"
-              fill="none"
-              stroke="rgba(16, 185, 129, 0.3)"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-          </svg>
-
-          <motion.div
-            className="absolute inset-0"
-            style={{ transformOrigin: '50% 50%' }}
-            animate={{ rotate: -360 }}
-            transition={{ repeat: Infinity, duration: 70, ease: 'linear' }}
-          >
-            {orbitSkills.orbit2.map((skill, i) => {
-              const angle = (i / (orbitSkills.orbit2.length - 1)) * 180;
-              const radius = 348;
-              const x = Math.cos((angle * Math.PI) / 180) * radius;
-              const y = Math.sin((angle * Math.PI) / 180) * radius;
-
-              return (
-                <div
-                  key={skill.name}
-                  className="absolute"
-                  style={{
-                    left: `calc(50% + ${x}px)`,
-                    top: `calc(50% - ${y}px)`,
-                  }}
-                >
-                  <motion.div
-                    className="w-13 h-13 bg-gray-800 border-2 border-green-500 rounded-xl flex flex-col items-center justify-center shadow-lg -translate-x-1/2 -translate-y-1/2 cursor-pointer px-2 py-2"
-                    whileHover={{ scale: 1.15 }}
-                  >
-                    <span className="text-lg" style={{ color: skill.color }}>{skill.icon}</span>
-                    <span className="text-[7px] font-semibold text-white">
-                      {skill.name}
-                    </span>
-                  </motion.div>
-                </div>
-              );
-            })}
-          </motion.div>
-        </div>
-
-        {/* Orbit 3 */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{ width: '900px', height: '900px', bottom: '-540px' }}
-        >
-          <svg className="absolute inset-0 w-full h-full">
-            <circle
-              cx="450"
-              cy="450"
-              r="448"
-              fill="none"
-              stroke="rgba(168, 85, 247, 0.3)"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-          </svg>
-
-          <motion.div
-            className="absolute inset-0"
-            style={{ transformOrigin: '50% 50%' }}
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 90, ease: 'linear' }}
-          >
-            {orbitSkills.orbit3.map((skill, i) => {
-              const angle = (i / (orbitSkills.orbit3.length - 1)) * 180;
-              const radius = 448;
-              const x = Math.cos((angle * Math.PI) / 180) * radius;
-              const y = Math.sin((angle * Math.PI) / 180) * radius;
-
-              return (
-                <div
-                  key={skill.name}
-                  className="absolute"
-                  style={{
-                    left: `calc(50% + ${x}px)`,
-                    top: `calc(50% - ${y}px)`,
-                  }}
-                >
-                  <motion.div
-                    className="w-12 h-12 bg-gray-800 border-2 border-purple-500 rounded-xl flex flex-col items-center justify-center shadow-lg -translate-x-1/2 -translate-y-1/2 cursor-pointer px-1"
-                    whileHover={{ scale: 1.15 }}
-                  >
-                    <span className="text-base" style={{ color: skill.color }}>{skill.icon}</span>
-                    <span className="text-[6px] font-semibold text-white text-center">
-                      {skill.name}
-                    </span>
-                  </motion.div>
-                </div>
-              );
-            })}
-          </motion.div>
-        </div>
-      </div>
-    );
   };
 
   if (isMinimized) return null;

@@ -4,6 +4,7 @@ import FileManagerWindow from '../Windows/FileManagerWindow';
 import ProjectsWindow from '../Windows/ProjectsWindow';
 import AboutWindow from '../Windows/AboutWindow';
 import SkillsWindow from '../Windows/SkillsWindow';
+import MailWindow from '../Windows/MailWindow';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Terminal, FolderOpen, Rocket, User, Lightbulb, Grid3x3, 
@@ -16,7 +17,7 @@ import trashIcon from '/images/trash.png';
 import folder from '/images/folder.png';
 import vs from '/images/vs.png';
 import mail from '/images/mail.png';
-import ubuntuWallpaper from '/images/ubuntu-22-04-5-lts-3840x2160-23443.png'; // Add your jellyfish wallpaper
+import ubuntuWallpaper from '/images/ubuntu-22-04-5-lts-3840x2160-23443.png';
 
 const Desktop = () => {
     const [terminals, setTerminals] = useState([]);
@@ -24,6 +25,7 @@ const Desktop = () => {
     const [projects, setProjects] = useState([]);
     const [abouts, setAbouts] = useState([]);
     const [skills, setSkills] = useState([]);
+    const [mails, setMails] = useState([]);
     const [maxZIndex, setMaxZIndex] = useState(40);
     const [windowOffset, setWindowOffset] = useState(0);
     const [showApplications, setShowApplications] = useState(false);
@@ -57,6 +59,10 @@ const Desktop = () => {
         } else if (windowType === 'about') {
             setAbouts(prev => prev.map(a =>
                 a.id === windowId ? { ...a, zIndex: newZIndex } : a
+            ));
+        } else if (windowType === 'mail') {
+            setMails(prev => prev.map(m =>
+                m.id === windowId ? { ...m, zIndex: newZIndex } : m
             ));
         }
     };
@@ -181,7 +187,7 @@ const Desktop = () => {
 
     const handleProjectsMinimize = (id) => {
         setProjects(prev => prev.map(p =>
-            p.id === id ? { ...t, isMinimized: true } : p
+            p.id === id ? { ...p, isMinimized: true } : p
         ));
     };
 
@@ -226,12 +232,46 @@ const Desktop = () => {
         ));
     };
 
+    // Mail handlers
+    const handleMailOpen = () => {
+        const offset = windowOffset % 5;
+        const newMail = {
+            id: Date.now(),
+            isMinimized: false,
+            zIndex: maxZIndex + 1,
+            offsetX: 180 + (offset * 30),
+            offsetY: 90 + (offset * 30)
+        };
+        setMaxZIndex(maxZIndex + 1);
+        setWindowOffset(windowOffset + 1);
+        setMails(prev => [...prev, newMail]);
+    };
+
+    const handleMailClose = (id) => {
+        setMails(prev => prev.filter(m => m.id !== id));
+    };
+
+    const handleMailMinimize = (id) => {
+        setMails(prev => prev.map(m =>
+            m.id === id ? { ...m, isMinimized: true } : m
+        ));
+    };
+
+    const handleMailRestore = (id) => {
+        const newZIndex = maxZIndex + 1;
+        setMaxZIndex(newZIndex);
+        setMails(prev => prev.map(m =>
+            m.id === id ? { ...m, isMinimized: false, zIndex: newZIndex } : m
+        ));
+    };
+
     const allMinimizedWindows = [
         ...terminals.filter(t => t.isMinimized).map(t => ({ ...t, type: 'terminal', name: 'Terminal' })),
         ...fileManagers.filter(fm => fm.isMinimized).map(fm => ({ ...fm, type: 'filemanager', name: 'Files' })),
         ...skills.filter(s => s.isMinimized).map(s => ({ ...s, type: 'skills', name: 'Skills' })),
         ...projects.filter(p => p.isMinimized).map(p => ({ ...p, type: 'projects', name: 'Projects' })),
-        ...abouts.filter(a => a.isMinimized).map(a => ({ ...a, type: 'about', name: 'About' }))
+        ...abouts.filter(a => a.isMinimized).map(a => ({ ...a, type: 'about', name: 'About' })),
+        ...mails.filter(m => m.isMinimized).map(m => ({ ...m, type: 'mail', name: 'Mail' }))
     ];
 
     const handleRestoreWindow = (id, type) => {
@@ -240,6 +280,7 @@ const Desktop = () => {
         else if (type === 'skills') handleSkillsRestore(id);
         else if (type === 'projects') handleProjectsRestore(id);
         else if (type === 'about') handleAboutRestore(id);
+        else if (type === 'mail') handleMailRestore(id);
     };
 
     const formatTime = (date) => {
@@ -296,6 +337,7 @@ const Desktop = () => {
                 onSkillsClick={handleSkillsOpen}
                 onProjectsClick={handleProjectsOpen}
                 onAboutClick={handleAboutOpen}
+                onMailClick={handleMailOpen}
                 minimizedWindows={allMinimizedWindows}
                 onShowApplications={() => setShowApplications(!showApplications)}
             />
@@ -374,6 +416,20 @@ const Desktop = () => {
                             onFocus={() => bringToFront(about.id, 'about')}
                         />
                     ))}
+
+                    {mails.map(mailWindow => (
+                        <MailWindow
+                            key={mailWindow.id}
+                            id={mailWindow.id}
+                            isMinimized={mailWindow.isMinimized}
+                            zIndex={mailWindow.zIndex}
+                            offsetX={mailWindow.offsetX}
+                            offsetY={mailWindow.offsetY}
+                            onClose={() => handleMailClose(mailWindow.id)}
+                            onMinimize={() => handleMailMinimize(mailWindow.id)}
+                            onFocus={() => bringToFront(mailWindow.id, 'mail')}
+                        />
+                    ))}
                 </div>
             </div>
 
@@ -387,6 +443,7 @@ const Desktop = () => {
                         onSkillsClick={() => { handleSkillsOpen(); setShowApplications(false); }}
                         onProjectsClick={() => { handleProjectsOpen(); setShowApplications(false); }}
                         onAboutClick={() => { handleAboutOpen(); setShowApplications(false); }}
+                        onMailClick={() => { handleMailOpen(); setShowApplications(false); }}
                     />
                 )}
             </AnimatePresence>
@@ -401,6 +458,7 @@ const UbuntuLauncher = ({
     onSkillsClick, 
     onProjectsClick, 
     onAboutClick,
+    onMailClick,
     minimizedWindows,
     onShowApplications
 }) => {
@@ -419,7 +477,7 @@ const UbuntuLauncher = ({
         { id: 'about', name: 'About', icon: User, onClick: onAboutClick, type: 'about', color: 'bg-green-500' },
         { id: 'terminal', name: 'Terminal', icon: Terminal, onClick: onTerminalClick, type: 'terminal', color: 'bg-gray-700' },
         { id: 'firefox', name: 'Firefox', isImage: true, imageSrc: firefoxLogo },
-        { id: 'mail', name: 'mail', isImage: true, imageSrc: mail },
+        { id: 'mail', name: 'Mail', isImage: true, imageSrc: mail, onClick: onMailClick, type: 'mail' },
         { id: 'code', name: 'VS Code', isImage: true, imageSrc: vs },
         { id: 'settings', name: 'Settings', icon: Settings, color: 'bg-gray-600' },
         { id: 'trash', name: 'Trash', isImage: true, imageSrc: trashIcon, bottom: true },
@@ -513,7 +571,8 @@ const ApplicationsGrid = ({
     onFileManagerClick, 
     onSkillsClick, 
     onProjectsClick, 
-    onAboutClick 
+    onAboutClick,
+    onMailClick
 }) => {
     const apps = [
         { name: 'Files', isImage: true, imageSrc: folder, onClick: onFileManagerClick },
@@ -522,6 +581,7 @@ const ApplicationsGrid = ({
         { name: 'Skills', icon: Lightbulb, onClick: onSkillsClick, color: 'bg-yellow-500' },
         { name: 'Projects', icon: Rocket, onClick: onProjectsClick, color: 'bg-purple-500' },
         { name: 'About', icon: User, onClick: onAboutClick, color: 'bg-green-500' },
+        { name: 'Mail', isImage: true, imageSrc: mail, onClick: onMailClick },
         { name: 'VS Code', isImage: true, imageSrc: vs },
         { name: 'Settings', icon: Settings, color: 'bg-gray-600' },
     ];
