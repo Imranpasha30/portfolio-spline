@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive, FileCode, Layout } from 'lucide-react';
+import { X, Minus, Maximize2, Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive, FileCode, Layout, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SiReact,
@@ -235,13 +235,30 @@ const ArcOrbitSkills = React.memo(() => {
 
 ArcOrbitSkills.displayName = 'ArcOrbitSkills';
 
-const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 160, offsetY = 90, onFocus }) => {
+const SkillsWindow = ({ 
+  id, 
+  isMinimized, 
+  onClose, 
+  onMinimize, 
+  zIndex = 40, 
+  offsetX = 160, 
+  offsetY = 90, 
+  onFocus,
+  onOpenMail  // Add this prop to open the Mail window
+}) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [previousSize, setPreviousSize] = useState({ width: 1100, height: 700, x: 160, y: 90 });
   const [size, setSize] = useState({ width: 1100, height: 700 });
   const [position, setPosition] = useState({ x: offsetX, y: offsetY });
   const [selectedCategory, setSelectedCategory] = useState('home');
   const rndRef = useRef(null);
+
+  // Handle Contact Button Click - Opens Mail Window
+  const handleContactClick = () => {
+    if (onOpenMail) {
+      onOpenMail(); // This will open your Mail window component
+    }
+  };
 
   // Memoize skills data so it doesn't recreate on every render
   const skillsData = useMemo(() => ({
@@ -510,10 +527,12 @@ const SkillsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offse
                     I'm a Full Stack Developer with a strong foundation in building scalable web applications and mobile backends. With a solid grasp of cybersecurity principles and secure coding practices, I focus on writing clean, reliable code while designing systems that are resilient to real‑world threats. My experience across frontend, backend, and security allows me to build and protect robust applications end‑to‑end.
                   </p>
                   <motion.button
-                    className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold rounded-full shadow-lg hover:shadow-yellow-500/50 transition-shadow"
+                    onClick={handleContactClick}
+                    className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold rounded-full shadow-lg hover:shadow-yellow-500/50 transition-shadow flex items-center gap-2"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
+                    <Mail size={20} />
                     Contact Me
                   </motion.button>
                 </div>

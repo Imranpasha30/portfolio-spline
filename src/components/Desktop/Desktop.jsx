@@ -5,6 +5,8 @@ import ProjectsWindow from '../Windows/ProjectsWindow';
 import AboutWindow from '../Windows/AboutWindow';
 import SkillsWindow from '../Windows/SkillsWindow';
 import MailWindow from '../Windows/MailWindow';
+import VSCodeWindow from '../Windows/VSCodeWindow';
+import SettingsWindow from '../Windows/SettingsWindow';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Terminal, FolderOpen, Rocket, User, Lightbulb, Grid3x3, 
@@ -26,10 +28,17 @@ const Desktop = () => {
     const [abouts, setAbouts] = useState([]);
     const [skills, setSkills] = useState([]);
     const [mails, setMails] = useState([]);
+    const [vscodes, setVSCodes] = useState([]);
+    const [settings, setSettings] = useState([]);
     const [maxZIndex, setMaxZIndex] = useState(40);
     const [windowOffset, setWindowOffset] = useState(0);
     const [showApplications, setShowApplications] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+    
+    // Customization states
+    const [wallpaper, setWallpaper] = useState(ubuntuWallpaper);
+    const [panelColor, setPanelColor] = useState({ name: 'Dark', value: '#1a1a1a', opacity: 90 });
+    const [launcherColor, setLauncherColor] = useState({ name: 'Dark', value: '#1a1a1a', opacity: 90 });
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -63,6 +72,14 @@ const Desktop = () => {
         } else if (windowType === 'mail') {
             setMails(prev => prev.map(m =>
                 m.id === windowId ? { ...m, zIndex: newZIndex } : m
+            ));
+        } else if (windowType === 'vscode') {
+            setVSCodes(prev => prev.map(v =>
+                v.id === windowId ? { ...v, zIndex: newZIndex } : v
+            ));
+        } else if (windowType === 'settings') {
+            setSettings(prev => prev.map(s =>
+                s.id === windowId ? { ...s, zIndex: newZIndex } : s
             ));
         }
     };
@@ -265,13 +282,93 @@ const Desktop = () => {
         ));
     };
 
+    // VS Code handlers
+    const handleVSCodeOpen = () => {
+        const offset = windowOffset % 5;
+        const newVSCode = {
+            id: Date.now(),
+            isMinimized: false,
+            zIndex: maxZIndex + 1,
+            offsetX: 200 + (offset * 30),
+            offsetY: 100 + (offset * 30)
+        };
+        setMaxZIndex(maxZIndex + 1);
+        setWindowOffset(windowOffset + 1);
+        setVSCodes(prev => [...prev, newVSCode]);
+    };
+
+    const handleVSCodeClose = (id) => {
+        setVSCodes(prev => prev.filter(v => v.id !== id));
+    };
+
+    const handleVSCodeMinimize = (id) => {
+        setVSCodes(prev => prev.map(v =>
+            v.id === id ? { ...v, isMinimized: true } : v
+        ));
+    };
+
+    const handleVSCodeRestore = (id) => {
+        const newZIndex = maxZIndex + 1;
+        setMaxZIndex(newZIndex);
+        setVSCodes(prev => prev.map(v =>
+            v.id === id ? { ...v, isMinimized: false, zIndex: newZIndex } : v
+        ));
+    };
+
+    // Settings handlers
+    const handleSettingsOpen = () => {
+        const offset = windowOffset % 5;
+        const newSettings = {
+            id: Date.now(),
+            isMinimized: false,
+            zIndex: maxZIndex + 1,
+            offsetX: 200 + (offset * 30),
+            offsetY: 100 + (offset * 30)
+        };
+        setMaxZIndex(maxZIndex + 1);
+        setWindowOffset(windowOffset + 1);
+        setSettings(prev => [...prev, newSettings]);
+    };
+
+    const handleSettingsClose = (id) => {
+        setSettings(prev => prev.filter(s => s.id !== id));
+    };
+
+    const handleSettingsMinimize = (id) => {
+        setSettings(prev => prev.map(s =>
+            s.id === id ? { ...s, isMinimized: true } : s
+        ));
+    };
+
+    const handleSettingsRestore = (id) => {
+        const newZIndex = maxZIndex + 1;
+        setMaxZIndex(newZIndex);
+        setSettings(prev => prev.map(s =>
+            s.id === id ? { ...s, isMinimized: false, zIndex: newZIndex } : s
+        ));
+    };
+
+    const handleWallpaperChange = (newWallpaper) => {
+        setWallpaper(newWallpaper);
+    };
+
+    const handlePanelColorChange = (color) => {
+        setPanelColor(color);
+    };
+
+    const handleLauncherColorChange = (color) => {
+        setLauncherColor(color);
+    };
+
     const allMinimizedWindows = [
         ...terminals.filter(t => t.isMinimized).map(t => ({ ...t, type: 'terminal', name: 'Terminal' })),
         ...fileManagers.filter(fm => fm.isMinimized).map(fm => ({ ...fm, type: 'filemanager', name: 'Files' })),
         ...skills.filter(s => s.isMinimized).map(s => ({ ...s, type: 'skills', name: 'Skills' })),
         ...projects.filter(p => p.isMinimized).map(p => ({ ...p, type: 'projects', name: 'Projects' })),
         ...abouts.filter(a => a.isMinimized).map(a => ({ ...a, type: 'about', name: 'About' })),
-        ...mails.filter(m => m.isMinimized).map(m => ({ ...m, type: 'mail', name: 'Mail' }))
+        ...mails.filter(m => m.isMinimized).map(m => ({ ...m, type: 'mail', name: 'Mail' })),
+        ...vscodes.filter(v => v.isMinimized).map(v => ({ ...v, type: 'vscode', name: 'VS Code' })),
+        ...settings.filter(s => s.isMinimized).map(s => ({ ...s, type: 'settings', name: 'Settings' }))
     ];
 
     const handleRestoreWindow = (id, type) => {
@@ -281,6 +378,8 @@ const Desktop = () => {
         else if (type === 'projects') handleProjectsRestore(id);
         else if (type === 'about') handleAboutRestore(id);
         else if (type === 'mail') handleMailRestore(id);
+        else if (type === 'vscode') handleVSCodeRestore(id);
+        else if (type === 'settings') handleSettingsRestore(id);
     };
 
     const formatTime = (date) => {
@@ -296,16 +395,21 @@ const Desktop = () => {
 
     return (
         <div className="relative w-screen h-screen overflow-hidden">
-            {/* Ubuntu Jellyfish Wallpaper */}
+            {/* Ubuntu Wallpaper - NO GRADIENT */}
             <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
                 style={{
-                    backgroundImage: `linear-gradient(to bottom right, rgba(94, 39, 80, 0.3), rgba(184, 84, 80, 0.3)), url(${ubuntuWallpaper})`
+                    backgroundImage: `url(${wallpaper})`
                 }}
             />
 
-            {/* Top Bar - Exact Ubuntu Style */}
-            <div className="absolute top-0 left-0 right-0 h-7 bg-[#1a1a1a]/90 backdrop-blur-sm flex items-center justify-between px-2 z-50 text-white text-xs">
+            {/* Top Bar */}
+            <div 
+                className="absolute top-0 left-0 right-0 h-7 backdrop-blur-sm flex items-center justify-between px-2 z-50 text-white text-xs transition-all duration-300"
+                style={{
+                    backgroundColor: `${panelColor.value}${Math.round((panelColor.opacity / 100) * 255).toString(16).padStart(2, '0')}`
+                }}
+            >
                 {/* Left: Activities */}
                 <div className="flex items-center gap-4">
                     <div className="px-3 py-0.5 font-medium text-white/90">
@@ -330,7 +434,7 @@ const Desktop = () => {
                 </div>
             </div>
 
-            {/* Left Launcher - Exact Ubuntu Dock */}
+            {/* Left Launcher */}
             <UbuntuLauncher
                 onTerminalClick={handleTerminalOpen}
                 onFileManagerClick={handleFileManagerOpen}
@@ -338,28 +442,36 @@ const Desktop = () => {
                 onProjectsClick={handleProjectsOpen}
                 onAboutClick={handleAboutOpen}
                 onMailClick={handleMailOpen}
+                onVSCodeClick={handleVSCodeOpen}
+                onSettingsClick={handleSettingsOpen}
                 minimizedWindows={allMinimizedWindows}
                 onShowApplications={() => setShowApplications(!showApplications)}
+                launcherColor={launcherColor}
             />
 
             {/* Desktop Area */}
             <div className="absolute inset-0 pt-7 pl-16">
                 <div className="relative w-full h-full">
                     {terminals.map(terminal => (
-                        <TerminalWindow
-                            key={terminal.id}
-                            id={terminal.id}
-                            isMinimized={terminal.isMinimized}
-                            zIndex={terminal.zIndex}
-                            offsetX={terminal.offsetX}
-                            offsetY={terminal.offsetY}
-                            onClose={() => handleTerminalClose(terminal.id)}
-                            onMinimize={() => handleTerminalMinimize(terminal.id)}
-                            onProjectsOpen={handleProjectsOpen}
-                            onSkillsOpen={handleSkillsOpen}
-                            onFocus={() => bringToFront(terminal.id, 'terminal')}
-                        />
-                    ))}
+    <TerminalWindow
+        key={terminal.id}
+        id={terminal.id}
+        isMinimized={terminal.isMinimized}
+        zIndex={terminal.zIndex}
+        offsetX={terminal.offsetX}
+        offsetY={terminal.offsetY}
+        onClose={() => handleTerminalClose(terminal.id)}
+        onMinimize={() => handleTerminalMinimize(terminal.id)}
+        onProjectsOpen={handleProjectsOpen}
+        onSkillsOpen={handleSkillsOpen}
+        onAboutOpen={handleAboutOpen}
+        onMailOpen={handleMailOpen}
+        onFileManagerOpen={handleFileManagerOpen}
+        onVSCodeOpen={handleVSCodeOpen}
+        onSettingsOpen={handleSettingsOpen}
+        onFocus={() => bringToFront(terminal.id, 'terminal')}
+    />
+))}
 
                     {fileManagers.map(fm => (
                         <FileManagerWindow
@@ -383,6 +495,7 @@ const Desktop = () => {
                             zIndex={skill.zIndex}
                             offsetX={skill.offsetX}
                             offsetY={skill.offsetY}
+                            onOpenMail={handleMailOpen}
                             onClose={() => handleSkillsClose(skill.id)}
                             onMinimize={() => handleSkillsMinimize(skill.id)}
                             onFocus={() => bringToFront(skill.id, 'skills')}
@@ -430,6 +543,40 @@ const Desktop = () => {
                             onFocus={() => bringToFront(mailWindow.id, 'mail')}
                         />
                     ))}
+
+                    {vscodes.map(vscode => (
+                        <VSCodeWindow
+                            key={vscode.id}
+                            id={vscode.id}
+                            isMinimized={vscode.isMinimized}
+                            zIndex={vscode.zIndex}
+                            offsetX={vscode.offsetX}
+                            offsetY={vscode.offsetY}
+                            onClose={() => handleVSCodeClose(vscode.id)}
+                            onMinimize={() => handleVSCodeMinimize(vscode.id)}
+                            onFocus={() => bringToFront(vscode.id, 'vscode')}
+                        />
+                    ))}
+
+                    {settings.map(setting => (
+                        <SettingsWindow
+                            key={setting.id}
+                            id={setting.id}
+                            isMinimized={setting.isMinimized}
+                            zIndex={setting.zIndex}
+                            offsetX={setting.offsetX}
+                            offsetY={setting.offsetY}
+                            onClose={() => handleSettingsClose(setting.id)}
+                            onMinimize={() => handleSettingsMinimize(setting.id)}
+                            onFocus={() => bringToFront(setting.id, 'settings')}
+                            currentWallpaper={wallpaper}
+                            onWallpaperChange={handleWallpaperChange}
+                            currentPanelColor={panelColor}
+                            onPanelColorChange={handlePanelColorChange}
+                            currentLauncherColor={launcherColor}
+                            onLauncherColorChange={handleLauncherColorChange}
+                        />
+                    ))}
                 </div>
             </div>
 
@@ -444,6 +591,8 @@ const Desktop = () => {
                         onProjectsClick={() => { handleProjectsOpen(); setShowApplications(false); }}
                         onAboutClick={() => { handleAboutOpen(); setShowApplications(false); }}
                         onMailClick={() => { handleMailOpen(); setShowApplications(false); }}
+                        onVSCodeClick={() => { handleVSCodeOpen(); setShowApplications(false); }}
+                        onSettingsClick={() => { handleSettingsOpen(); setShowApplications(false); }}
                     />
                 )}
             </AnimatePresence>
@@ -459,8 +608,11 @@ const UbuntuLauncher = ({
     onProjectsClick, 
     onAboutClick,
     onMailClick,
+    onVSCodeClick,
+    onSettingsClick,
     minimizedWindows,
-    onShowApplications
+    onShowApplications,
+    launcherColor
 }) => {
     const [mounted, setMounted] = useState(false);
 
@@ -468,7 +620,6 @@ const UbuntuLauncher = ({
         setMounted(true);
     }, []);
 
-    // Updated icon list with all image icons
     const launcherItems = [
         { id: 'grid', name: 'Show Applications', icon: Grid3x3, onClick: onShowApplications, special: true },
         { id: 'files', name: 'Files', isImage: true, onClick: onFileManagerClick, imageSrc: folder, type: 'filemanager' },
@@ -478,8 +629,8 @@ const UbuntuLauncher = ({
         { id: 'terminal', name: 'Terminal', icon: Terminal, onClick: onTerminalClick, type: 'terminal', color: 'bg-gray-700' },
         { id: 'firefox', name: 'Firefox', isImage: true, imageSrc: firefoxLogo },
         { id: 'mail', name: 'Mail', isImage: true, imageSrc: mail, onClick: onMailClick, type: 'mail' },
-        { id: 'code', name: 'VS Code', isImage: true, imageSrc: vs },
-        { id: 'settings', name: 'Settings', icon: Settings, color: 'bg-gray-600' },
+        { id: 'code', name: 'VS Code', isImage: true, imageSrc: vs, onClick: onVSCodeClick, type: 'vscode' },
+        { id: 'settings', name: 'Settings', icon: Settings, onClick: onSettingsClick, type: 'settings', color: 'bg-gray-600' },
         { id: 'trash', name: 'Trash', isImage: true, imageSrc: trashIcon, bottom: true },
     ];
 
@@ -545,7 +696,12 @@ const UbuntuLauncher = ({
     };
 
     return (
-        <div className="absolute left-0 top-7 bottom-0 w-16 bg-[#1a1a1a]/90 backdrop-blur-sm flex flex-col items-center pt-2 z-40">
+        <div 
+            className="absolute left-0 top-7 bottom-0 w-16 backdrop-blur-sm flex flex-col items-center pt-2 z-40 transition-all duration-300"
+            style={{
+                backgroundColor: `${launcherColor.value}${Math.round((launcherColor.opacity / 100) * 255).toString(16).padStart(2, '0')}`
+            }}
+        >
             {/* Top Icons */}
             <div className="flex flex-col items-center gap-1">
                 {normalIcons.map((item, index) => (
@@ -572,7 +728,9 @@ const ApplicationsGrid = ({
     onSkillsClick, 
     onProjectsClick, 
     onAboutClick,
-    onMailClick
+    onMailClick,
+    onVSCodeClick,
+    onSettingsClick
 }) => {
     const apps = [
         { name: 'Files', isImage: true, imageSrc: folder, onClick: onFileManagerClick },
@@ -582,8 +740,8 @@ const ApplicationsGrid = ({
         { name: 'Projects', icon: Rocket, onClick: onProjectsClick, color: 'bg-purple-500' },
         { name: 'About', icon: User, onClick: onAboutClick, color: 'bg-green-500' },
         { name: 'Mail', isImage: true, imageSrc: mail, onClick: onMailClick },
-        { name: 'VS Code', isImage: true, imageSrc: vs },
-        { name: 'Settings', icon: Settings, color: 'bg-gray-600' },
+        { name: 'VS Code', isImage: true, imageSrc: vs, onClick: onVSCodeClick },
+        { name: 'Settings', icon: Settings, onClick: onSettingsClick, color: 'bg-gray-600' },
     ];
 
     return (

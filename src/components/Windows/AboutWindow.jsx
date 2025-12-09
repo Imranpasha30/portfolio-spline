@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, MapPin, Mail, Briefcase, GraduationCap, Award, Download, Github, Linkedin, Twitter, Coffee, Code, Zap, Heart, School, BookOpen, Shield, Instagram } from 'lucide-react';
+import { X, Minus, Maximize2, MapPin, Mail, Briefcase, GraduationCap, Award, Download, Github, Linkedin, Twitter, Coffee, Code, Zap, Heart, School, BookOpen, Shield, Instagram, Check } from 'lucide-react';
 import { motion, useAnimation } from 'framer-motion';
 
 const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 180, offsetY = 120, onFocus }) => {
@@ -9,6 +9,9 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
     const [size, setSize] = useState({ width: 1000, height: 700 });
     const [position, setPosition] = useState({ x: offsetX, y: offsetY });
     const [activeTab, setActiveTab] = useState('overview');
+    const [downloadProgress, setDownloadProgress] = useState(0);
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadComplete, setDownloadComplete] = useState(false);
     const rndRef = useRef(null);
 
     const handleMaximize = () => {
@@ -27,6 +30,54 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
 
     const handleMinimize = () => {
         onMinimize();
+    };
+
+    // Download Resume Function with Progress Animation
+    const handleDownloadResume = async () => {
+        if (isDownloading) return;
+
+        setIsDownloading(true);
+        setDownloadProgress(0);
+        setDownloadComplete(false);
+
+        try {
+            // Simulate download progress
+            const interval = setInterval(() => {
+                setDownloadProgress(prev => {
+                    if (prev >= 100) {
+                        clearInterval(interval);
+                        return 100;
+                    }
+                    return prev + 10;
+                });
+            }, 100);
+
+            // Wait for progress to complete
+            await new Promise(resolve => setTimeout(resolve, 1100));
+
+            // Create download link
+            const link = document.createElement('a');
+            link.href = '/documents/imranpasha_resume.pdf';
+            link.download = 'Imran_Pasha_Resume.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success state
+            setDownloadComplete(true);
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                setIsDownloading(false);
+                setDownloadProgress(0);
+                setDownloadComplete(false);
+            }, 2000);
+
+        } catch (error) {
+            console.error('Download failed:', error);
+            setIsDownloading(false);
+            setDownloadProgress(0);
+        }
     };
 
     if (isMinimized) {
@@ -147,23 +198,34 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
                                     className="flex gap-3 justify-center mb-6"
                                 >
                                     <SocialButton icon={<Github size={20} />} href="https://github.com/Imranpasha30" />
-                                    <SocialButton icon={<Linkedin size={20} />} href="www.linkedin.com/in/imran-pasha-019b2b213" />
+                                    <SocialButton icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/imran-pasha-019b2b213" />
                                     <SocialButton icon={<Instagram size={20} />} href="https://www.instagram.com/beast_forge_x?utm_source=qr&igsh=c2hzbWMxYTR3Y2R2" />
-                                    <SocialButton icon={<Mail size={20} />} href="#" />
                                 </motion.div>
 
-                                {/* CTA Button */}
-                                <motion.button
+                                {/* TryHackMe Badge */}
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.35, type: 'spring' }}
+                                    className="flex justify-center mb-6"
+                                >
+                                    <TryHackMeBadge />
+                                </motion.div>
+
+                                {/* Download Resume Button with Progress */}
+                                <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
                                     transition={{ delay: 0.4, type: 'spring' }}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-full shadow-lg hover:shadow-cyan-500/50 transition-shadow flex items-center gap-2 mx-auto"
+                                    className="mx-auto"
                                 >
-                                    <Download size={20} />
-                                    Download Resume
-                                </motion.button>
+                                    <DownloadButton
+                                        onClick={handleDownloadResume}
+                                        isDownloading={isDownloading}
+                                        downloadProgress={downloadProgress}
+                                        downloadComplete={downloadComplete}
+                                    />
+                                </motion.div>
                             </div>
                         </div>
                     </div>
@@ -211,6 +273,202 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
                 </div>
             </div>
         </Rnd>
+    );
+};
+
+// Download Button Component with Progress Animation
+const DownloadButton = ({ onClick, isDownloading, downloadProgress, downloadComplete }) => {
+    return (
+        <motion.button
+            onClick={onClick}
+            disabled={isDownloading}
+            whileHover={!isDownloading ? { scale: 1.05 } : {}}
+            whileTap={!isDownloading ? { scale: 0.95 } : {}}
+            className={`relative px-8 py-4 font-bold rounded-full shadow-lg transition-all duration-300 flex items-center gap-2 mx-auto overflow-hidden ${
+                downloadComplete
+                    ? 'bg-green-500 hover:shadow-green-500/50'
+                    : isDownloading
+                    ? 'bg-blue-600 cursor-wait'
+                    : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-cyan-500/50'
+            }`}
+            style={{ minWidth: '220px' }}
+        >
+            {/* Progress Bar Background */}
+            {isDownloading && (
+                <motion.div
+                    className="absolute inset-0 bg-cyan-400 opacity-30"
+                    initial={{ width: '0%' }}
+                    animate={{ width: `${downloadProgress}%` }}
+                    transition={{ duration: 0.1 }}
+                />
+            )}
+
+            {/* Button Content */}
+            <div className="relative z-10 flex items-center gap-2 text-white">
+                {downloadComplete ? (
+                    <>
+                        <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: 'spring' }}
+                        >
+                            <Check size={20} />
+                        </motion.div>
+                        <span>Downloaded!</span>
+                    </>
+                ) : isDownloading ? (
+                    <>
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                        >
+                            <Download size={20} />
+                        </motion.div>
+                        <span>Downloading {downloadProgress}%</span>
+                    </>
+                ) : (
+                    <>
+                        <Download size={20} />
+                        <span>Download Resume</span>
+                    </>
+                )}
+            </div>
+        </motion.button>
+    );
+};
+
+// TryHackMe Badge Component
+const TryHackMeBadge = () => {
+    const handleClick = () => {
+        window.open('https://tryhackme.com/p/devilhost666', '_blank');
+    };
+
+    return (
+        <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleClick}
+            className="cursor-pointer"
+            style={{
+                width: '329px',
+                height: '88px',
+                backgroundImage: "url('https://tryhackme.com/img/thm_public_badge_bg.svg')",
+                backgroundSize: 'cover',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                userSelect: 'none',
+                borderRadius: '12px',
+                padding: '10px'
+            }}
+        >
+            {/* Avatar */}
+            <div style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                background: 'linear-gradient(to bottom left, #a3ea2a, #2e4463)',
+                padding: '2px'
+            }}>
+                <div style={{
+                    backgroundImage: 'url(https://tryhackme-images.s3.amazonaws.com/user-avatars/6238a9fb2f7dfd0051da9557-1757759603692)',
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundColor: '#121212'
+                }} />
+            </div>
+
+            {/* User Details */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {/* Name and Rank */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{
+                        fontFamily: 'Ubuntu, sans-serif',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        color: '#f9f9fb'
+                    }}>
+                        devilhost666
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ color: '#ffbb45', fontSize: '10px' }}>⚡</span>
+                        <span style={{
+                            fontFamily: 'Ubuntu, sans-serif',
+                            fontWeight: 500,
+                            fontSize: '12px',
+                            color: '#ffffff'
+                        }}>
+                            [0x8]
+                        </span>
+                    </div>
+                </div>
+
+                {/* Stats */}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ color: '#9ca4b4', fontSize: '11px' }}>🏆</span>
+                        <span style={{
+                            fontFamily: 'Ubuntu, sans-serif',
+                            fontSize: '11px',
+                            color: '#ffffff'
+                        }}>
+                            206381
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ color: '#a3ea2a', fontSize: '11px' }}>🔥</span>
+                        <span style={{
+                            fontFamily: 'Ubuntu, sans-serif',
+                            fontSize: '11px',
+                            color: '#ffffff'
+                        }}>
+                            0 days
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ color: '#d752ff', fontSize: '11px' }}>🏅</span>
+                        <span style={{
+                            fontFamily: 'Ubuntu, sans-serif',
+                            fontSize: '11px',
+                            color: '#ffffff'
+                        }}>
+                            9
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ color: '#719cf9', fontSize: '11px' }}>🚪</span>
+                        <span style={{
+                            fontFamily: 'Ubuntu, sans-serif',
+                            fontSize: '11px',
+                            color: '#ffffff'
+                        }}>
+                            49
+                        </span>
+                    </div>
+                </div>
+
+                {/* Link */}
+                <a 
+                    href="https://tryhackme.com" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        fontFamily: 'Ubuntu, sans-serif',
+                        fontSize: '11px',
+                        color: '#f9f9fb',
+                        textDecoration: 'none'
+                    }}
+                    onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                    onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                >
+                    tryhackme.com
+                </a>
+            </div>
+        </motion.div>
     );
 };
 
@@ -309,6 +567,8 @@ const NetworkBackground = () => {
 const SocialButton = ({ icon, href }) => (
     <motion.a
         href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         whileHover={{ scale: 1.1, y: -2 }}
         whileTap={{ scale: 0.95 }}
         className="w-12 h-12 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
@@ -439,7 +699,7 @@ const JourneyTab = () => {
         {
             year: '2025',
             title: 'PG Diploma - Cybersecurity',
-            company: 'IIT Roorkee (i-HUB Divyasampark)',
+            company: 'IIT Roorkee (i-HUB)',
             description: 'Specializing in cybersecurity and preparing for CEH certification',
             icon: <Shield size={20} />,
             color: 'red'
@@ -533,7 +793,7 @@ const TimelineItem = ({ item, index }) => {
 const AchievementsTab = () => {
     const achievements = [
         { title: 'Promoted to Tech Leader', icon: '🚀', color: 'from-blue-500 to-cyan-500' },
-        { title: 'IIT Roorkee - Cybersecurity', icon: '🔒', color: 'from-red-500 to-orange-500' },
+        { title: 'IIT Roorkee(i-HUB) - Cybersecurity', icon: '🔒', color: 'from-red-500 to-orange-500' },
         { title: 'Leading Development Projects', icon: '💻', color: 'from-green-500 to-teal-500' },
         { title: 'CEH Preparation', icon: '🛡️', color: 'from-purple-500 to-pink-500' },
         { title: 'Pursuing MBA', icon: '🎓', color: 'from-yellow-500 to-orange-500' },
