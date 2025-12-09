@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, ExternalLink, Github, Code2, Sparkles, Star } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { X, Minus, Maximize2, ExternalLink, Github, Sparkles, Star, ArrowUpRight } from 'lucide-react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 const ProjectsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 200, offsetY = 100, onFocus }) => {
     const [isMaximized, setIsMaximized] = useState(false);
@@ -11,115 +11,96 @@ const ProjectsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, off
     const [selectedFilter, setSelectedFilter] = useState('all');
     const rndRef = useRef(null);
 
-    // Dummy project data with varying heights
+    // Real project data with size variations
     const projects = [
         {
             id: 1,
-            title: 'E-Commerce Platform',
-            description: 'Full-stack e-commerce solution with payment integration, real-time inventory, and admin dashboard. Built with microservices architecture.',
+            title: 'Sharkify.ai',
+            description: 'A comprehensive digital marketing automation platform with a full-featured dashboard. Product-based solution offering automated marketing workflows, analytics, and campaign management for businesses.',
             category: 'fullstack',
-            tags: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-            image: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-blue-500 to-cyan-500',
-            size: 'large', // large card
-            featured: true
+            tags: ['Node.js', 'Express', 'Angular', 'PostgreSQL', 'Google Cloud', 'Firebase', 'Meta API', 'PayU'],
+            image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+            demo: 'https://sharkify.ai/',
+            gradient: 'from-blue-600 via-cyan-500 to-teal-400',
+            accentColor: '#06b6d4',
+            size: 'large',
+            featured: true,
+            hasDemo: true
         },
         {
             id: 2,
-            title: 'AI Chatbot',
-            description: 'Intelligent chatbot using OpenAI GPT-4 with custom training.',
-            category: 'ai',
-            tags: ['Python', 'OpenAI', 'LangChain'],
-            image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-purple-500 to-pink-500',
-            size: 'small'
+            title: 'Bose American Academy',
+            description: 'Online educational platform enabling instructors to create, sell, and manage courses. Complete e-learning solution with payment integration, course management, and student tracking. Hosted on AWS with S3, RDS, EC2, and Route 53.',
+            category: 'fullstack',
+            tags: ['Node.js', 'Express', 'Angular', 'PostgreSQL', 'AWS S3', 'AWS RDS', 'AWS EC2', 'Route 53', 'PayU'],
+            image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&q=80',
+            demo: 'https://boseamerican.academy/',
+            gradient: 'from-emerald-600 via-green-500 to-teal-400',
+            accentColor: '#10b981',
+            size: 'large',
+            featured: true,
+            hasDemo: true
         },
         {
             id: 3,
-            title: 'Security Scanner Tool',
-            description: 'Automated vulnerability scanner for web applications with detailed reporting.',
-            category: 'security',
-            tags: ['Python', 'Nmap', 'OWASP'],
-            image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-red-500 to-orange-500',
-            size: 'medium'
+            title: 'Kaizer Fit',
+            description: 'AI-powered fitness tracking mobile app published on Google Play Store. Features workout tracking, nutrition planning, and progress analytics. AI integration in development for personalized workout recommendations.',
+            category: 'mobile',
+            tags: ['Flutter', 'FastAPI', 'PostgreSQL', 'Google Cloud', 'Google Maps API', 'AI/ML'],
+            image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80',
+            demo: 'https://play.google.com/store/apps/details?id=com.Kaizerfit.gymapp',
+            gradient: 'from-orange-600 via-amber-500 to-yellow-400',
+            accentColor: '#f59e0b',
+            size: 'small',
+            hasDemo: true
         },
         {
             id: 4,
-            title: 'Real-Time Analytics',
-            description: 'Live data visualization dashboard with WebSocket integration and customizable widgets for business intelligence.',
+            title: 'Editors Dashboard',
+            description: 'Advanced content management system with Telegram integration. Extracts videos via Telegram MTP protocol, stores in API video service. Features three portals: Manager (assigns videos), Editor (completes tasks), and Admin (full system overview).',
             category: 'fullstack',
-            tags: ['Next.js', 'TypeScript', 'D3.js'],
+            tags: ['Node.js', 'Express', 'Angular', 'PostgreSQL', 'Telegram API', 'Railway'],
             image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-green-500 to-teal-500',
-            size: 'large',
-            featured: true
+            demo: 'https://editorsdashboard-production.up.railway.app/',
+            gradient: 'from-purple-600 via-fuchsia-500 to-pink-400',
+            accentColor: '#a855f7',
+            size: 'medium',
+            hasDemo: true
         },
         {
             id: 5,
-            title: 'Fitness Tracker',
-            description: 'Cross-platform mobile app for workout tracking and nutrition.',
-            category: 'mobile',
-            tags: ['Flutter', 'Firebase'],
-            image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-yellow-500 to-orange-500',
-            size: 'small'
+            title: 'Live Violence Detection',
+            description: 'Real-time violence detection system for live streams using machine learning and computer vision. Automatically alerts nearby police stations when violence is detected. Trained model using PyTorch with Telegram integration.',
+            category: 'ai',
+            tags: ['Python', 'PyTorch', 'Computer Vision', 'Machine Learning', 'Telegram API', 'Real-time Processing'],
+            image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',
+            github: 'https://github.com/Imranpasha30/project.git',
+            gradient: 'from-red-600 via-rose-500 to-orange-400',
+            accentColor: '#ef4444',
+            size: 'large',
+            featured: true,
+            hasGithub: true
         },
         {
             id: 6,
-            title: 'Cloud Infrastructure Manager',
-            description: 'DevOps tool for managing multi-cloud infrastructure with automated deployment.',
-            category: 'devops',
-            tags: ['AWS', 'Docker', 'Terraform'],
-            image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-indigo-500 to-purple-500',
-            size: 'medium'
-        },
-        {
-            id: 7,
-            title: 'Social Media Dashboard',
-            description: 'Analytics platform for managing multiple social media accounts.',
-            category: 'fullstack',
-            tags: ['React', 'Express', 'PostgreSQL'],
-            image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-pink-500 to-rose-500',
-            size: 'small'
-        },
-        {
-            id: 8,
-            title: 'Blockchain Explorer',
-            description: 'Web3 application for exploring blockchain transactions and smart contracts with real-time updates.',
-            category: 'fullstack',
-            tags: ['React', 'Web3.js', 'Ethers.js'],
-            image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&q=80',
-            github: 'https://github.com',
-            demo: 'https://demo.com',
-            color: 'from-cyan-500 to-blue-500',
-            size: 'large'
+            title: 'Shyra - AI SEO',
+            description: 'AI-powered SEO content wrapper using ChatGPT and Gemini LLM models. Generates SEO-rich metadata, tags, and descriptions for video scripts to optimize search performance.',
+            category: 'ai',
+            tags: ['Django', 'OpenAI', 'Gemini', 'PostgreSQL', 'Uvicorn', 'Gunicorn'],
+            image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80',
+            github: 'https://github.com/SharkifyTech/Shyra.git',
+            gradient: 'from-indigo-600 via-purple-500 to-pink-400',
+            accentColor: '#6366f1',
+            size: 'small',
+            hasGithub: true
         }
     ];
 
     const categories = [
-        { id: 'all', name: 'All Projects', icon: Sparkles },
-        { id: 'fullstack', name: 'Full Stack', icon: Code2 },
-        { id: 'ai', name: 'AI/ML', icon: Sparkles },
-        { id: 'security', name: 'Security', icon: Code2 },
-        { id: 'mobile', name: 'Mobile', icon: Code2 },
-        { id: 'devops', name: 'DevOps', icon: Code2 },
+        { id: 'all', name: 'All Projects', count: projects.length },
+        { id: 'fullstack', name: 'Full Stack', count: projects.filter(p => p.category === 'fullstack').length },
+        { id: 'ai', name: 'AI/ML', count: projects.filter(p => p.category === 'ai').length },
+        { id: 'mobile', name: 'Mobile', count: projects.filter(p => p.category === 'mobile').length },
     ];
 
     const filteredProjects = selectedFilter === 'all' 
@@ -209,29 +190,53 @@ const ProjectsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, off
                 </div>
 
                 {/* Projects Content Area */}
-                <div className="flex-1 overflow-hidden bg-gray-900 flex flex-col">
+                <div className="flex-1 overflow-hidden bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 flex flex-col">
                     {/* Header Section */}
-                    <div className="p-6 border-b border-gray-800">
-                        <div className="flex items-center gap-2 mb-2">
-                            <h1 className="text-3xl font-bold text-white">My Projects</h1>
-                            <Sparkles className="text-yellow-400" size={24} />
-                        </div>
-                        <p className="text-gray-400">Explore my portfolio of innovative solutions</p>
+                    <div className="p-6 border-b border-gray-800/50 backdrop-blur-sm">
+                        <motion.div 
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-3 mb-2"
+                        >
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                                My Projects
+                            </h1>
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            >
+                                <Sparkles className="text-yellow-400" size={28} />
+                            </motion.div>
+                        </motion.div>
+                        <p className="text-gray-400 mb-4">Interactive showcase of innovative solutions</p>
                         
-                        {/* Filter Buttons */}
-                        <div className="flex flex-wrap gap-2 mt-4">
-                            {categories.map(cat => (
-                                <button
+                        {/* Filter Pills */}
+                        <div className="flex flex-wrap gap-2">
+                            {categories.map((cat, idx) => (
+                                <motion.button
                                     key={cat.id}
+                                    initial={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: idx * 0.1 }}
                                     onClick={() => setSelectedFilter(cat.id)}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                    className={`relative px-5 py-2.5 rounded-full text-sm font-semibold transition-all overflow-hidden ${
                                         selectedFilter === cat.id
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/50'
-                                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                                            ? 'text-white'
+                                            : 'bg-gray-800/50 text-gray-400 hover:text-white hover:bg-gray-800'
                                     }`}
                                 >
-                                    {cat.name}
-                                </button>
+                                    {selectedFilter === cat.id && (
+                                        <motion.div
+                                            layoutId="activeFilter"
+                                            className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500"
+                                            transition={{ type: "spring", duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        {cat.name}
+                                        <span className="text-xs opacity-70">({cat.count})</span>
+                                    </span>
+                                </motion.button>
                             ))}
                         </div>
                     </div>
@@ -250,151 +255,205 @@ const ProjectsWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, off
     );
 };
 
-// Project Card Component with 3D hover effect and varying sizes
+// Enhanced Project Card with varying heights
 const ProjectCard = ({ project, index }) => {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const cardRef = useRef(null);
     const [isHovering, setIsHovering] = useState(false);
 
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+
+    const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [7.5, -7.5]), { stiffness: 300, damping: 30 });
+    const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-7.5, 7.5]), { stiffness: 300, damping: 30 });
+
     const handleMouseMove = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width;
-        const y = (e.clientY - rect.top) / rect.height;
-        setMousePosition({ x, y });
+        if (!cardRef.current) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        const mouseXPos = e.clientX - rect.left;
+        const mouseYPos = e.clientY - rect.top;
+        const xPct = mouseXPos / width - 0.5;
+        const yPct = mouseYPos / height - 0.5;
+        mouseX.set(xPct);
+        mouseY.set(yPct);
     };
 
-    const cardStyle = {
-        transform: isHovering
-            ? `perspective(1000px) rotateX(${(mousePosition.y - 0.5) * -5}deg) rotateY(${(mousePosition.x - 0.5) * 5}deg) scale3d(1.02, 1.02, 1.02)`
-            : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+    const handleMouseLeave = () => {
+        mouseX.set(0);
+        mouseY.set(0);
+        setIsHovering(false);
     };
 
-    // Dynamic heights based on size
-    const heightClass = {
-        small: 'h-auto',
-        medium: 'h-auto',
-        large: 'h-auto'
-    }[project.size];
-
+    // Dynamic image heights based on size
     const imageHeight = {
-        small: 'h-32',
-        medium: 'h-48',
+        small: 'h-40',
+        medium: 'h-52',
         large: 'h-64'
     }[project.size];
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            ref={cardRef}
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ 
+                delay: index * 0.1,
+                type: "spring",
+                stiffness: 260,
+                damping: 20
+            }}
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-            style={cardStyle}
-            className={`relative bg-gray-800 rounded-xl overflow-hidden border border-gray-700 transition-all duration-300 ease-out group break-inside-avoid mb-6 ${heightClass}`}
+            onMouseLeave={handleMouseLeave}
+            style={{
+                rotateX,
+                rotateY,
+                transformStyle: "preserve-3d",
+            }}
+            className="relative group cursor-pointer break-inside-avoid mb-6"
         >
-            {/* Featured Badge */}
-            {project.featured && (
-                <div className="absolute top-4 right-4 z-10">
-                    <div className="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                        <Star size={12} fill="currentColor" />
-                        Featured
+            {/* Card Container */}
+            <div className="relative bg-gray-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-gray-700/50 shadow-2xl hover:shadow-cyan-500/20 transition-shadow duration-500">
+                {/* Featured Badge */}
+                {project.featured && (
+                    <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ delay: index * 0.1 + 0.3, type: "spring" }}
+                        className="absolute top-4 right-4 z-20"
+                    >
+                        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                            <Star size={12} fill="currentColor" />
+                            Featured
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Image Container with Parallax */}
+                <div className={`relative ${imageHeight} overflow-hidden`}>
+                    {/* Gradient Overlay */}
+                    <motion.div
+                        className={`absolute inset-0 bg-gradient-to-br ${project.gradient} mix-blend-overlay z-10`}
+                        animate={{
+                            opacity: isHovering ? 0.6 : 0.3
+                        }}
+                        transition={{ duration: 0.3 }}
+                    />
+                    
+                    {/* Image */}
+                    <motion.img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                        style={{
+                            scale: isHovering ? 1.1 : 1,
+                            transition: "scale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)"
+                        }}
+                    />
+
+                    {/* Animated Glow Effect */}
+                    <motion.div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        style={{
+                            background: `radial-gradient(circle at ${mouseX.get() * 100 + 50}% ${mouseY.get() * 100 + 50}%, ${project.accentColor}40 0%, transparent 50%)`
+                        }}
+                    />
+
+                    {/* Hover Action Buttons */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: isHovering ? 1 : 0, y: isHovering ? 0 : 20 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0 flex items-center justify-center gap-4 bg-black/60 backdrop-blur-sm z-20"
+                    >
+                        {project.hasGithub && (
+                            <motion.a
+                                href={project.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="p-4 bg-white rounded-full text-gray-900 shadow-xl hover:shadow-2xl transition-shadow"
+                            >
+                                <Github size={24} />
+                            </motion.a>
+                        )}
+                        {project.hasDemo && (
+                            <motion.a
+                                href={project.demo}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                whileHover={{ scale: 1.1, rotate: -5 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full text-white shadow-xl hover:shadow-2xl transition-shadow"
+                            >
+                                <ExternalLink size={24} />
+                            </motion.a>
+                        )}
+                    </motion.div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6" style={{ transform: "translateZ(50px)" }}>
+                    <motion.h3 
+                        className="text-2xl font-bold text-white mb-3 flex items-center gap-2"
+                        animate={{
+                            color: isHovering ? project.accentColor : "#ffffff"
+                        }}
+                    >
+                        {project.title}
+                        {isHovering && (
+                            <motion.span
+                                initial={{ scale: 0, rotate: -180 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                            >
+                                <ArrowUpRight size={20} />
+                            </motion.span>
+                        )}
+                    </motion.h3>
+                    
+                    <p className={`text-gray-400 text-sm mb-4 ${project.size === 'small' ? 'line-clamp-2' : project.size === 'medium' ? 'line-clamp-3' : ''}`}>
+                        {project.description}
+                    </p>
+
+                    {/* All Tags Visible */}
+                    <div className="flex flex-wrap gap-2">
+                        {project.tags.map((tag, i) => (
+                            <motion.span
+                                key={i}
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ 
+                                    delay: index * 0.1 + i * 0.05,
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 15
+                                }}
+                                whileHover={{ scale: 1.1, y: -2 }}
+                                className="px-3 py-1 bg-gray-700/50 backdrop-blur-sm text-gray-300 text-xs rounded-full border border-gray-600/50 hover:border-cyan-500/50 transition-colors"
+                            >
+                                {tag}
+                            </motion.span>
+                        ))}
                     </div>
                 </div>
-            )}
 
-            {/* Image Section with Reveal Effect */}
-            <div className={`relative ${imageHeight} overflow-hidden`}>
+                {/* Bottom Glow Bar */}
                 <motion.div
-                    className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-40`}
-                    animate={{
-                        scale: isHovering ? 1.1 : 1,
-                    }}
-                    transition={{ duration: 0.4 }}
-                />
-                <motion.img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                    animate={{
-                        scale: isHovering ? 1.1 : 1,
-                    }}
-                    transition={{ duration: 0.4 }}
-                />
-                
-                {/* Overlay on hover */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isHovering ? 1 : 0 }}
-                    className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center gap-4"
-                >
-                    <motion.a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: isHovering ? 0 : 20, opacity: isHovering ? 1 : 0 }}
-                        transition={{ delay: 0.1 }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="p-3 bg-white rounded-full text-gray-900 hover:bg-gray-200 transition-colors"
-                    >
-                        <Github size={20} />
-                    </motion.a>
-                    <motion.a
-                        href={project.demo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: isHovering ? 0 : 20, opacity: isHovering ? 1 : 0 }}
-                        transition={{ delay: 0.15 }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="p-3 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
-                    >
-                        <ExternalLink size={20} />
-                    </motion.a>
-                </motion.div>
-
-                {/* Animated gradient border on hover */}
-                <motion.div
-                    className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-0 group-hover:opacity-20 transition-opacity pointer-events-none`}
+                    className={`h-1 bg-gradient-to-r ${project.gradient}`}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: isHovering ? 1 : 0 }}
+                    transition={{ duration: 0.5 }}
                 />
             </div>
 
-            {/* Content Section */}
-            <div className={`p-5 ${project.size === 'large' ? 'pb-6' : 'pb-5'}`}>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                    {project.title}
-                </h3>
-                <p className={`text-gray-400 text-sm mb-4 ${project.size === 'small' ? 'line-clamp-2' : ''}`}>
-                    {project.description}
-                </p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2">
-                    {project.tags.map((tag, i) => (
-                        <motion.span
-                            key={i}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: index * 0.1 + i * 0.05 }}
-                            className="px-3 py-1 bg-gray-700 text-gray-300 text-xs rounded-full hover:bg-gray-600 transition-colors cursor-default"
-                        >
-                            {tag}
-                        </motion.span>
-                    ))}
-                </div>
-            </div>
-
-            {/* Animated shine effect */}
+            {/* Floating Shadow Effect */}
             <motion.div
-                className="absolute inset-0 pointer-events-none"
-                animate={{
-                    background: isHovering
-                        ? `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(255,255,255,0.1) 0%, transparent 50%)`
-                        : 'transparent'
-                }}
-                transition={{ duration: 0.2 }}
+                className={`absolute inset-0 -z-10 rounded-2xl bg-gradient-to-r ${project.gradient} blur-2xl`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isHovering ? 0.3 : 0 }}
+                transition={{ duration: 0.5 }}
             />
         </motion.div>
     );
