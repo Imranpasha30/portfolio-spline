@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, MapPin, Mail, Briefcase, GraduationCap, Award, Download, Github, Linkedin, Twitter, Coffee, Code, Zap, Heart, School, BookOpen, Shield, Instagram, Check } from 'lucide-react';
-import { motion, useAnimation } from 'framer-motion';
+import { X, Minus, Maximize2, MapPin, Briefcase, GraduationCap, Download, Github, Linkedin, Instagram, Check, Code, School, BookOpen, Shield, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 180, offsetY = 120, onFocus }) => {
     const [isMaximized, setIsMaximized] = useState(false);
@@ -32,7 +32,6 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
         onMinimize();
     };
 
-    // Download Resume Function with Progress Animation
     const handleDownloadResume = async () => {
         if (isDownloading) return;
 
@@ -41,7 +40,6 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
         setDownloadComplete(false);
 
         try {
-            // Simulate download progress
             const interval = setInterval(() => {
                 setDownloadProgress(prev => {
                     if (prev >= 100) {
@@ -52,10 +50,8 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
                 });
             }, 100);
 
-            // Wait for progress to complete
             await new Promise(resolve => setTimeout(resolve, 1100));
 
-            // Create download link
             const link = document.createElement('a');
             link.href = '/documents/imranpasha_resume.pdf';
             link.download = 'Imran_Pasha_Resume.pdf';
@@ -63,10 +59,8 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
             link.click();
             document.body.removeChild(link);
 
-            // Show success state
             setDownloadComplete(true);
 
-            // Reset after 2 seconds
             setTimeout(() => {
                 setIsDownloading(false);
                 setDownloadProgress(0);
@@ -149,36 +143,72 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
 
                 {/* About Content Area */}
                 <div className="flex-1 overflow-auto bg-gray-900">
-                    {/* Hero Section with Network Animation */}
+                    {/* Hero Section with ROW LAYOUT */}
                     <div className="relative bg-black p-8 overflow-hidden">
                         {/* Network Animation Background */}
                         <NetworkBackground />
 
-                        <div className="relative z-10 flex flex-col items-center justify-center text-center">
-                            {/* Intro Text */}
-                            <div className="max-w-3xl">
-                                <motion.h1
-                                    initial={{ y: -20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    className="text-5xl font-bold text-white mb-3"
-                                >
-                                    Hi, I'm Imran pasha
-                                </motion.h1>
-                                <motion.p
-                                    initial={{ y: -20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 0.1 }}
-                                    className="text-2xl mb-6"
-                                >
-                                    <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent font-semibold">
-                                        Full Stack Developer & Cybersecurity Specialist
-                                    </span>
-                                </motion.p>
+                        {/* ROW LAYOUT: Profile Left, Content Right */}
+                        <div className="relative z-10 flex flex-row items-center gap-10">
+                            {/* LEFT COLUMN - Profile Picture */}
+                            <motion.div
+                                initial={{ scale: 0, rotate: -180 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                transition={{ type: 'spring', duration: 0.8 }}
+                                className="flex-shrink-0"
+                            >
+                                <div className="relative">
+                                    {/* Animated Border */}
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ repeat: Infinity, duration: 8, ease: 'linear' }}
+                                        className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-cyan-500 to-purple-500 p-1"
+                                        style={{ width: '212px', height: '212px', margin: '-6px' }}
+                                    />
+                                    
+                                    {/* Profile Image - Larger */}
+                                    <img
+                                        src="/images/profile.jpg"
+                                        alt="Imran Pasha"
+                                        className="w-52 h-52 rounded-full object-cover border-4 border-gray-900 relative z-10"
+                                        onError={(e) => {
+                                            e.target.src = 'https://ui-avatars.com/api/?name=Imran+Pasha&size=208&background=3b82f6&color=fff&bold=true';
+                                        }}
+                                    />
+                                    
+                                    {/* Online Status Indicator */}
+                                    <motion.div
+                                        animate={{ scale: [1, 1.2, 1] }}
+                                        transition={{ repeat: Infinity, duration: 2 }}
+                                        className="absolute bottom-4 right-4 w-7 h-7 bg-green-500 rounded-full border-4 border-gray-900 z-20"
+                                    />
+                                </div>
+                            </motion.div>
+
+                            {/* RIGHT COLUMN - Content */}
+                            <div className="flex-1 text-left">
+                                {/* Name and Title */}
                                 <motion.div
                                     initial={{ y: -20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.2 }}
-                                    className="flex flex-wrap gap-6 justify-center mb-6"
+                                >
+                                    <h1 className="text-5xl font-bold text-white mb-3">
+                                        Hi, I'm Imran Pasha
+                                    </h1>
+                                    <p className="text-2xl mb-6">
+                                        <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent font-semibold">
+                                            Full Stack Developer & Cybersecurity Specialist
+                                        </span>
+                                    </p>
+                                </motion.div>
+
+                                {/* Info Tags */}
+                                <motion.div
+                                    initial={{ y: -20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="flex flex-wrap gap-4 mb-6"
                                 >
                                     <div className="flex items-center gap-2 text-gray-400">
                                         <MapPin size={18} className="text-cyan-400" />
@@ -194,8 +224,8 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
                                 <motion.div
                                     initial={{ y: -20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 0.3 }}
-                                    className="flex gap-3 justify-center mb-6"
+                                    transition={{ delay: 0.4 }}
+                                    className="flex gap-3 mb-6"
                                 >
                                     <SocialButton icon={<Github size={20} />} href="https://github.com/Imranpasha30" />
                                     <SocialButton icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/imran-pasha-019b2b213" />
@@ -206,18 +236,17 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    transition={{ delay: 0.35, type: 'spring' }}
-                                    className="flex justify-center mb-6"
+                                    transition={{ delay: 0.5, type: 'spring' }}
+                                    className="mb-6"
                                 >
                                     <TryHackMeBadge />
                                 </motion.div>
 
-                                {/* Download Resume Button with Progress */}
+                                {/* Download Resume Button */}
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    transition={{ delay: 0.4, type: 'spring' }}
-                                    className="mx-auto"
+                                    transition={{ delay: 0.6, type: 'spring' }}
                                 >
                                     <DownloadButton
                                         onClick={handleDownloadResume}
@@ -256,13 +285,11 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
                             >
                                 My Journey
                             </TabButton>
-                            
                         </div>
 
                         {/* Tab Content */}
                         {activeTab === 'overview' && <OverviewTab />}
                         {activeTab === 'journey' && <JourneyTab />}
-                       
                     </div>
                 </div>
             </div>
@@ -278,7 +305,7 @@ const DownloadButton = ({ onClick, isDownloading, downloadProgress, downloadComp
             disabled={isDownloading}
             whileHover={!isDownloading ? { scale: 1.05 } : {}}
             whileTap={!isDownloading ? { scale: 0.95 } : {}}
-            className={`relative px-8 py-4 font-bold rounded-full shadow-lg transition-all duration-300 flex items-center gap-2 mx-auto overflow-hidden ${
+            className={`relative px-8 py-4 font-bold rounded-full shadow-lg transition-all duration-300 flex items-center gap-2 overflow-hidden ${
                 downloadComplete
                     ? 'bg-green-500 hover:shadow-green-500/50'
                     : isDownloading
@@ -287,7 +314,6 @@ const DownloadButton = ({ onClick, isDownloading, downloadProgress, downloadComp
             }`}
             style={{ minWidth: '220px' }}
         >
-            {/* Progress Bar Background */}
             {isDownloading && (
                 <motion.div
                     className="absolute inset-0 bg-cyan-400 opacity-30"
@@ -297,7 +323,6 @@ const DownloadButton = ({ onClick, isDownloading, downloadProgress, downloadComp
                 />
             )}
 
-            {/* Button Content */}
             <div className="relative z-10 flex items-center gap-2 text-white">
                 {downloadComplete ? (
                     <>
@@ -356,7 +381,6 @@ const TryHackMeBadge = () => {
                 padding: '10px'
             }}
         >
-            {/* Avatar */}
             <div style={{
                 width: '60px',
                 height: '60px',
@@ -375,9 +399,7 @@ const TryHackMeBadge = () => {
                 }} />
             </div>
 
-            {/* User Details */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {/* Name and Rank */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{
                         fontFamily: 'Ubuntu, sans-serif',
@@ -400,7 +422,6 @@ const TryHackMeBadge = () => {
                     </div>
                 </div>
 
-                {/* Stats */}
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                         <span style={{ color: '#9ca4b4', fontSize: '11px' }}>🏆</span>
@@ -444,7 +465,6 @@ const TryHackMeBadge = () => {
                     </div>
                 </div>
 
-                {/* Link */}
                 <a 
                     href="https://tryhackme.com" 
                     target="_blank"
@@ -782,9 +802,6 @@ const TimelineItem = ({ item, index }) => {
         </motion.div>
     );
 };
-
-// Achievements Tab
-
 
 // Skill Highlight Component
 const SkillHighlight = ({ title, description, gradient }) => (
