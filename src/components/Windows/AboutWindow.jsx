@@ -256,19 +256,13 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
                             >
                                 My Journey
                             </TabButton>
-                            <TabButton 
-                                active={activeTab === 'achievements'} 
-                                onClick={() => setActiveTab('achievements')}
-                                icon={<Award size={16} />}
-                            >
-                                Achievements
-                            </TabButton>
+                            
                         </div>
 
                         {/* Tab Content */}
                         {activeTab === 'overview' && <OverviewTab />}
                         {activeTab === 'journey' && <JourneyTab />}
-                        {activeTab === 'achievements' && <AchievementsTab />}
+                       
                     </div>
                 </div>
             </div>
@@ -790,41 +784,7 @@ const TimelineItem = ({ item, index }) => {
 };
 
 // Achievements Tab
-const AchievementsTab = () => {
-    const achievements = [
-        { title: 'Promoted to Tech Leader', icon: '🚀', color: 'from-blue-500 to-cyan-500' },
-        { title: 'IIT Roorkee(i-HUB) - Cybersecurity', icon: '🔒', color: 'from-red-500 to-orange-500' },
-        { title: 'Leading Development Projects', icon: '💻', color: 'from-green-500 to-teal-500' },
-        { title: 'CEH Preparation', icon: '🛡️', color: 'from-purple-500 to-pink-500' },
-        { title: 'Pursuing MBA', icon: '🎓', color: 'from-yellow-500 to-orange-500' },
-        { title: 'Built 15+ Projects', icon: '⚡', color: 'from-indigo-500 to-purple-500' }
-    ];
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
-        >
-            <h2 className="text-2xl font-bold text-white mb-6">Achievements & Milestones</h2>
-            <div className="grid grid-cols-3 gap-4">
-                {achievements.map((achievement, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ delay: index * 0.1, type: 'spring' }}
-                        whileHover={{ scale: 1.05, rotate: 5 }}
-                        className={`bg-gradient-to-br ${achievement.color} p-6 rounded-xl text-center cursor-pointer`}
-                    >
-                        <div className="text-4xl mb-2">{achievement.icon}</div>
-                        <h3 className="text-white font-bold">{achievement.title}</h3>
-                    </motion.div>
-                ))}
-            </div>
-        </motion.div>
-    );
-};
 
 // Skill Highlight Component
 const SkillHighlight = ({ title, description, gradient }) => (
