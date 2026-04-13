@@ -1,36 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, MapPin, Briefcase, GraduationCap, Download, Github, Linkedin, Instagram, Check, Code, School, BookOpen, Shield, Heart } from 'lucide-react';
+import { MapPin, Briefcase, GraduationCap, Download, Github, Linkedin, Instagram, Check, Code, School, BookOpen, Shield, Heart, User } from 'lucide-react';
 import { motion } from 'framer-motion';
+import WindowShell from './WindowShell';
 
 const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offsetX = 180, offsetY = 120, onFocus }) => {
-    const [isMaximized, setIsMaximized] = useState(false);
-    const [previousSize, setPreviousSize] = useState({ width: 1000, height: 700, x: 180, y: 120 });
-    const [size, setSize] = useState({ width: 1000, height: 700 });
-    const [position, setPosition] = useState({ x: offsetX, y: offsetY });
     const [activeTab, setActiveTab] = useState('overview');
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
     const [downloadComplete, setDownloadComplete] = useState(false);
-    const rndRef = useRef(null);
-
-    const handleMaximize = () => {
-        if (!isMaximized) {
-            setPreviousSize({
-                width: size.width,
-                height: size.height,
-                x: position.x,
-                y: position.y
-            });
-            setIsMaximized(true);
-        } else {
-            setIsMaximized(false);
-        }
-    };
-
-    const handleMinimize = () => {
-        onMinimize();
-    };
 
     const handleDownloadResume = async () => {
         if (isDownloading) return;
@@ -74,226 +51,172 @@ const AboutWindow = ({ id, isMinimized, onClose, onMinimize, zIndex = 40, offset
         }
     };
 
-    if (isMinimized) {
-        return null;
-    }
-
     return (
-        <Rnd
-            ref={rndRef}
-            dragHandleClassName="drag-handle"
-            default={{
-                x: offsetX,
-                y: offsetY,
-                width: size.width,
-                height: size.height,
-            }}
-            position={isMaximized ? { x: 0, y: 32 } : position}
-            size={isMaximized ? { width: '100vw', height: 'calc(100vh - 32px)' } : size}
+        <WindowShell
+            id={id}
+            title="About Me"
+            icon={User}
+            isMinimized={isMinimized}
+            zIndex={zIndex}
+            defaultSize={{ width: 1000, height: 700 }}
+            defaultPosition={{ x: offsetX, y: offsetY }}
             minWidth={800}
             minHeight={600}
-            disableDragging={isMaximized}
-            enableResizing={!isMaximized}
-            onDragStop={(e, d) => {
-                setPosition({ x: d.x, y: d.y });
-            }}
-            onResizeStop={(e, direction, ref, delta, position) => {
-                setSize({
-                    width: ref.offsetWidth,
-                    height: ref.offsetHeight,
-                });
-                setPosition(position);
-            }}
-            bounds="parent"
-            style={{ zIndex: zIndex }}
+            onClose={onClose}
+            onMinimize={onMinimize}
+            onFocus={onFocus}
         >
-            <div
-                className="w-full h-full flex flex-col bg-gray-900 rounded-lg shadow-2xl border border-gray-700 overflow-hidden"
-                onMouseDown={onFocus}
-            >
-                {/* Window Title Bar */}
-                <div className="drag-handle flex items-center justify-between bg-gray-800 px-4 py-2 border-b border-gray-700 cursor-grab active:cursor-grabbing">
-                    <div className="flex items-center gap-3">
-                        <div className="flex gap-2">
-                            <button
-                                onClick={onClose}
-                                className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors group relative flex items-center justify-center"
-                                title="Close"
-                            >
-                                <X size={10} className="text-black opacity-0 group-hover:opacity-100 transition-opacity absolute" />
-                            </button>
-                            <button
-                                onClick={handleMinimize}
-                                className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors group relative flex items-center justify-center"
-                                title="Minimize"
-                            >
-                                <Minus size={10} className="text-black opacity-0 group-hover:opacity-100 transition-opacity absolute" />
-                            </button>
-                            <button
-                                onClick={handleMaximize}
-                                className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors group relative flex items-center justify-center"
-                                title="Maximize"
-                            >
-                                <Maximize2 size={10} className="text-black font-bold opacity-0 group-hover:opacity-100 transition-opacity absolute" />
-                            </button>
-                        </div>
-                        <span className="text-sm text-gray-300 font-medium">About Me</span>
-                    </div>
-                </div>
+            <div className="flex-1 overflow-auto bg-gray-900 h-full">
+                {/* Hero Section with ROW LAYOUT */}
+                <div className="relative bg-black p-8 overflow-hidden">
+                    {/* Network Animation Background */}
+                    <NetworkBackground />
 
-                {/* About Content Area */}
-                <div className="flex-1 overflow-auto bg-gray-900">
-                    {/* Hero Section with ROW LAYOUT */}
-                    <div className="relative bg-black p-8 overflow-hidden">
-                        {/* Network Animation Background */}
-                        <NetworkBackground />
+                    {/* ROW LAYOUT: Profile Left, Content Right */}
+                    <div className="relative z-10 flex flex-row items-center gap-10">
+                        {/* LEFT COLUMN - Profile Picture */}
+                        <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: 'spring', duration: 0.8 }}
+                            className="flex-shrink-0"
+                        >
+                            <div className="relative">
+                                {/* Animated Border */}
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ repeat: Infinity, duration: 8, ease: 'linear' }}
+                                    className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-cyan-500 to-purple-500 p-1"
+                                    style={{ width: '212px', height: '212px', margin: '-6px' }}
+                                />
 
-                        {/* ROW LAYOUT: Profile Left, Content Right */}
-                        <div className="relative z-10 flex flex-row items-center gap-10">
-                            {/* LEFT COLUMN - Profile Picture */}
+                                {/* Profile Image */}
+                                <img
+                                    src="/images/profile.jpg"
+                                    alt="Imran Pasha"
+                                    className="w-52 h-52 rounded-full object-cover border-4 border-gray-900 relative z-10"
+                                    onError={(e) => {
+                                        e.target.src = 'https://ui-avatars.com/api/?name=Imran+Pasha&size=208&background=3b82f6&color=fff&bold=true';
+                                    }}
+                                />
+
+                                {/* Online Status Indicator */}
+                                <motion.div
+                                    animate={{ scale: [1, 1.2, 1] }}
+                                    transition={{ repeat: Infinity, duration: 2 }}
+                                    className="absolute bottom-4 right-4 w-7 h-7 bg-green-500 rounded-full border-4 border-gray-900 z-20"
+                                />
+                            </div>
+                        </motion.div>
+
+                        {/* RIGHT COLUMN - Content */}
+                        <div className="flex-1 text-left">
+                            {/* Name and Title */}
                             <motion.div
-                                initial={{ scale: 0, rotate: -180 }}
-                                animate={{ scale: 1, rotate: 0 }}
-                                transition={{ type: 'spring', duration: 0.8 }}
-                                className="flex-shrink-0"
+                                initial={{ y: -20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.2 }}
                             >
-                                <div className="relative">
-                                    {/* Animated Border */}
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{ repeat: Infinity, duration: 8, ease: 'linear' }}
-                                        className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-cyan-500 to-purple-500 p-1"
-                                        style={{ width: '212px', height: '212px', margin: '-6px' }}
-                                    />
-                                    
-                                    {/* Profile Image - Larger */}
-                                    <img
-                                        src="/images/profile.jpg"
-                                        alt="Imran Pasha"
-                                        className="w-52 h-52 rounded-full object-cover border-4 border-gray-900 relative z-10"
-                                        onError={(e) => {
-                                            e.target.src = 'https://ui-avatars.com/api/?name=Imran+Pasha&size=208&background=3b82f6&color=fff&bold=true';
-                                        }}
-                                    />
-                                    
-                                    {/* Online Status Indicator */}
-                                    <motion.div
-                                        animate={{ scale: [1, 1.2, 1] }}
-                                        transition={{ repeat: Infinity, duration: 2 }}
-                                        className="absolute bottom-4 right-4 w-7 h-7 bg-green-500 rounded-full border-4 border-gray-900 z-20"
-                                    />
+                                <h1 className="text-5xl font-bold text-white mb-3">
+                                    Hi, I'm Imran Pasha
+                                </h1>
+                                <p className="text-2xl mb-6">
+                                    <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent font-semibold">
+                                        Full Stack Developer & Cybersecurity Specialist
+                                    </span>
+                                </p>
+                            </motion.div>
+
+                            {/* Info Tags */}
+                            <motion.div
+                                initial={{ y: -20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                                className="flex flex-wrap gap-4 mb-6"
+                            >
+                                <div className="flex items-center gap-2 text-gray-400">
+                                    <MapPin size={18} className="text-cyan-400" />
+                                    <span>India</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-gray-400">
+                                    <Briefcase size={18} className="text-green-400" />
+                                    <span>Tech Leader at Sharkify Technology</span>
                                 </div>
                             </motion.div>
 
-                            {/* RIGHT COLUMN - Content */}
-                            <div className="flex-1 text-left">
-                                {/* Name and Title */}
-                                <motion.div
-                                    initial={{ y: -20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 0.2 }}
-                                >
-                                    <h1 className="text-5xl font-bold text-white mb-3">
-                                        Hi, I'm Imran Pasha
-                                    </h1>
-                                    <p className="text-2xl mb-6">
-                                        <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent font-semibold">
-                                            Full Stack Developer & Cybersecurity Specialist
-                                        </span>
-                                    </p>
-                                </motion.div>
-
-                                {/* Info Tags */}
-                                <motion.div
-                                    initial={{ y: -20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 0.3 }}
-                                    className="flex flex-wrap gap-4 mb-6"
-                                >
-                                    <div className="flex items-center gap-2 text-gray-400">
-                                        <MapPin size={18} className="text-cyan-400" />
-                                        <span>India</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-gray-400">
-                                        <Briefcase size={18} className="text-green-400" />
-                                        <span>Tech Leader at Sharkify Technology</span>
-                                    </div>
-                                </motion.div>
-
-                                {/* Social Links */}
-                                <motion.div
-                                    initial={{ y: -20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 0.4 }}
-                                    className="flex gap-3 mb-6"
-                                >
-                                    <SocialButton icon={<Github size={20} />} href="https://github.com/Imranpasha30" />
-                                    <SocialButton icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/imran-pasha-019b2b213" />
-                                    <SocialButton icon={<Instagram size={20} />} href="https://www.instagram.com/beast_forge_x?utm_source=qr&igsh=c2hzbWMxYTR3Y2R2" />
-                                </motion.div>
-
-                                {/* TryHackMe Badge */}
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ delay: 0.5, type: 'spring' }}
-                                    className="mb-6"
-                                >
-                                    <TryHackMeBadge />
-                                </motion.div>
-
-                                {/* Download Resume Button */}
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ delay: 0.6, type: 'spring' }}
-                                >
-                                    <DownloadButton
-                                        onClick={handleDownloadResume}
-                                        isDownloading={isDownloading}
-                                        downloadProgress={downloadProgress}
-                                        downloadComplete={downloadComplete}
-                                    />
-                                </motion.div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Stats Section */}
-                    <div className="grid grid-cols-4 gap-4 p-6 bg-gray-800/50">
-                        <StatCard number="15+" label="Projects" icon={<Code />} delay={0} />
-                        <StatCard number="1+" label="Year Experience" icon={<Briefcase />} delay={0.1} />
-                        <StatCard number="500+" label="Commits" icon={<Github />} delay={0.2} />
-                        <StatCard number="3" label="Degrees Pursuing" icon={<GraduationCap />} delay={0.3} />
-                    </div>
-
-                    {/* Main Content */}
-                    <div className="p-6">
-                        {/* Tab Navigation */}
-                        <div className="flex gap-2 mb-6 border-b border-gray-700">
-                            <TabButton 
-                                active={activeTab === 'overview'} 
-                                onClick={() => setActiveTab('overview')}
-                                icon={<Heart size={16} />}
+                            {/* Social Links */}
+                            <motion.div
+                                initial={{ y: -20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.4 }}
+                                className="flex gap-3 mb-6"
                             >
-                                Overview
-                            </TabButton>
-                            <TabButton 
-                                active={activeTab === 'journey'} 
-                                onClick={() => setActiveTab('journey')}
-                                icon={<GraduationCap size={16} />}
-                            >
-                                My Journey
-                            </TabButton>
-                        </div>
+                                <SocialButton icon={<Github size={20} />} href="https://github.com/Imranpasha30" />
+                                <SocialButton icon={<Linkedin size={20} />} href="https://www.linkedin.com/in/imran-pasha-019b2b213" />
+                                <SocialButton icon={<Instagram size={20} />} href="https://www.instagram.com/beast_forge_x?utm_source=qr&igsh=c2hzbWMxYTR3Y2R2" />
+                            </motion.div>
 
-                        {/* Tab Content */}
-                        {activeTab === 'overview' && <OverviewTab />}
-                        {activeTab === 'journey' && <JourneyTab />}
+                            {/* TryHackMe Badge */}
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.5, type: 'spring' }}
+                                className="mb-6"
+                            >
+                                <TryHackMeBadge />
+                            </motion.div>
+
+                            {/* Download Resume Button */}
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.6, type: 'spring' }}
+                            >
+                                <DownloadButton
+                                    onClick={handleDownloadResume}
+                                    isDownloading={isDownloading}
+                                    downloadProgress={downloadProgress}
+                                    downloadComplete={downloadComplete}
+                                />
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
+
+                {/* Stats Section */}
+                <div className="grid grid-cols-4 gap-4 p-6 bg-gray-800/50">
+                    <StatCard number="15+" label="Projects" icon={<Code />} delay={0} />
+                    <StatCard number="1+" label="Year Experience" icon={<Briefcase />} delay={0.1} />
+                    <StatCard number="500+" label="Commits" icon={<Github />} delay={0.2} />
+                    <StatCard number="3" label="Degrees Pursuing" icon={<GraduationCap />} delay={0.3} />
+                </div>
+
+                {/* Main Content */}
+                <div className="p-6">
+                    {/* Tab Navigation */}
+                    <div className="flex gap-2 mb-6 border-b border-gray-700">
+                        <TabButton
+                            active={activeTab === 'overview'}
+                            onClick={() => setActiveTab('overview')}
+                            icon={<Heart size={16} />}
+                        >
+                            Overview
+                        </TabButton>
+                        <TabButton
+                            active={activeTab === 'journey'}
+                            onClick={() => setActiveTab('journey')}
+                            icon={<GraduationCap size={16} />}
+                        >
+                            My Journey
+                        </TabButton>
+                    </div>
+
+                    {/* Tab Content */}
+                    {activeTab === 'overview' && <OverviewTab />}
+                    {activeTab === 'journey' && <JourneyTab />}
+                </div>
             </div>
-        </Rnd>
+        </WindowShell>
     );
 };
 
@@ -465,8 +388,8 @@ const TryHackMeBadge = () => {
                     </div>
                 </div>
 
-                <a 
-                    href="https://tryhackme.com" 
+                <a
+                    href="https://tryhackme.com"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
@@ -531,6 +454,7 @@ const NetworkBackground = () => {
             particles.push(new Particle());
         }
 
+        let animId;
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -554,7 +478,7 @@ const NetworkBackground = () => {
                 }
             });
 
-            requestAnimationFrame(animate);
+            animId = requestAnimationFrame(animate);
         }
 
         animate();
@@ -565,7 +489,10 @@ const NetworkBackground = () => {
         };
 
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            cancelAnimationFrame(animId);
+        };
     }, []);
 
     return (
@@ -653,12 +580,12 @@ const OverviewTab = () => (
         <div>
             <h2 className="text-2xl font-bold text-white mb-4">About Me</h2>
             <p className="text-gray-300 leading-relaxed mb-4">
-                I'm a passionate Full Stack Developer and Cybersecurity Specialist currently serving as a Tech Leader at Sharkify Technology. 
+                I'm a passionate Full Stack Developer and Cybersecurity Specialist currently serving as a Tech Leader at Sharkify Technology.
                 My journey in tech combines strong educational foundations with hands-on experience in building secure, scalable applications.
             </p>
             <p className="text-gray-300 leading-relaxed">
-                With a B.Tech in Engineering and currently pursuing PG Diploma in Cybersecurity from IIT Roorkee (i-HUB), alongside an MBA 
-                from SSBM, I bring a unique blend of technical expertise and business acumen. I'm preparing for my CEH certification and 
+                With a B.Tech in Engineering and currently pursuing PG Diploma in Cybersecurity from IIT Roorkee (i-HUB), alongside an MBA
+                from SSBM, I bring a unique blend of technical expertise and business acumen. I'm preparing for my CEH certification and
                 constantly expanding my skills in full-stack development and security.
             </p>
         </div>

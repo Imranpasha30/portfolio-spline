@@ -1,6 +1,5 @@
-import React, { useState, useRef, useMemo } from 'react';
-import { Rnd } from 'react-rnd';
-import { X, Minus, Maximize2, Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive, FileCode, Layout, Mail } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Code, Database, Wrench, Shield, Cloud, Home as HomeIcon, Server, HardDrive, FileCode, Layout, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SiReact,
@@ -34,6 +33,7 @@ import {
   SiDjango,
   SiGooglecloud,
 } from 'react-icons/si';
+import WindowShell from './WindowShell';
 
 // Move ArcOrbitSkills OUTSIDE as a separate memoized component
 const ArcOrbitSkills = React.memo(() => {
@@ -235,32 +235,25 @@ const ArcOrbitSkills = React.memo(() => {
 
 ArcOrbitSkills.displayName = 'ArcOrbitSkills';
 
-const SkillsWindow = ({ 
-  id, 
-  isMinimized, 
-  onClose, 
-  onMinimize, 
-  zIndex = 40, 
-  offsetX = 160, 
-  offsetY = 90, 
+const SkillsWindow = ({
+  id,
+  isMinimized,
+  onClose,
+  onMinimize,
+  zIndex = 40,
+  offsetX = 160,
+  offsetY = 90,
   onFocus,
-  onOpenMail  // Add this prop to open the Mail window
+  onOpenMail
 }) => {
-  const [isMaximized, setIsMaximized] = useState(false);
-  const [previousSize, setPreviousSize] = useState({ width: 1100, height: 700, x: 160, y: 90 });
-  const [size, setSize] = useState({ width: 1100, height: 700 });
-  const [position, setPosition] = useState({ x: offsetX, y: offsetY });
   const [selectedCategory, setSelectedCategory] = useState('home');
-  const rndRef = useRef(null);
 
-  // Handle Contact Button Click - Opens Mail Window
   const handleContactClick = () => {
     if (onOpenMail) {
-      onOpenMail(); // This will open your Mail window component
+      onOpenMail();
     }
   };
 
-  // Memoize skills data so it doesn't recreate on every render
   const skillsData = useMemo(() => ({
     languages: {
       icon: FileCode,
@@ -389,20 +382,6 @@ const SkillsWindow = ({
     { id: 'ai', name: 'AI/ML', icon: Code },
   ], []);
 
-  const handleMaximize = () => {
-    if (!isMaximized) {
-      setPreviousSize({
-        width: size.width,
-        height: size.height,
-        x: position.x,
-        y: position.y
-      });
-      setIsMaximized(true);
-    } else {
-      setIsMaximized(false);
-    }
-  };
-
   const getColorClass = (category) => {
     const colors = {
       languages: 'blue',
@@ -431,185 +410,138 @@ const SkillsWindow = ({
     return gradients[color] || gradients.blue;
   };
 
-  if (isMinimized) return null;
-
   return (
-    <Rnd
-      ref={rndRef}
-      dragHandleClassName="drag-handle"
-      default={{
-        x: offsetX,
-        y: offsetY,
-        width: size.width,
-        height: size.height,
-      }}
-      position={isMaximized ? { x: 0, y: 32 } : position}
-      size={isMaximized ? { width: '100vw', height: 'calc(100vh - 32px)' } : size}
+    <WindowShell
+      id={id}
+      title="Skills & Technologies"
+      icon={Code}
+      isMinimized={isMinimized}
+      zIndex={zIndex}
+      defaultSize={{ width: 1100, height: 700 }}
+      defaultPosition={{ x: offsetX, y: offsetY }}
       minWidth={700}
       minHeight={500}
-      disableDragging={isMaximized}
-      enableResizing={!isMaximized}
-      onDragStop={(e, d) => setPosition({ x: d.x, y: d.y })}
-      onResizeStop={(e, direction, ref, delta, pos) => {
-        setSize({ width: ref.offsetWidth, height: ref.offsetHeight });
-        setPosition(pos);
-      }}
-      bounds="parent"
-      style={{ zIndex }}
+      onClose={onClose}
+      onMinimize={onMinimize}
+      onFocus={onFocus}
     >
-      <div
-        className="w-full h-full flex flex-col bg-gray-900 rounded-lg shadow-2xl border border-gray-700 overflow-hidden"
-        onMouseDown={onFocus}
-      >
-        {/* Title bar */}
-        <div className="drag-handle flex items-center justify-between bg-gray-800 px-4 py-2 border-b border-gray-700 cursor-grab active:cursor-grabbing">
-          <div className="flex items-center gap-3">
-            <div className="flex gap-2">
-              <button
-                onClick={onClose}
-                className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors group relative flex items-center justify-center"
-                title="Close"
-              >
-                <X size={10} className="text-black opacity-0 group-hover:opacity-100 transition-opacity absolute" />
-              </button>
-              <button
-                onClick={onMinimize}
-                className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors group relative flex items-center justify-center"
-                title="Minimize"
-              >
-                <Minus size={10} className="text-black opacity-0 group-hover:opacity-100 transition-opacity absolute" />
-              </button>
-              <button
-                onClick={handleMaximize}
-                className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors group relative flex items-center justify-center"
-                title="Maximize"
-              >
-                <Maximize2 size={10} className="text-black font-bold opacity-0 group-hover:opacity-100 transition-opacity absolute" />
-              </button>
-            </div>
-            <span className="text-sm text-gray-300 font-medium">Skills & Technologies</span>
+      <div className="flex flex-1 overflow-hidden h-full">
+        {/* Sidebar */}
+        <div className="w-56 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Categories</h3>
+          <div className="space-y-1">
+            {categories.map(category => {
+              const Icon = category.icon;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedCategory === category.id
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <Icon size={18} />
+                  <span className="text-sm">{category.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <div className="w-56 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3">Categories</h3>
-            <div className="space-y-1">
-              {categories.map(category => {
-                const Icon = category.icon;
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                      selectedCategory === category.id
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-300 hover:bg-gray-700'
-                    }`}
-                  >
-                    <Icon size={18} />
-                    <span className="text-sm">{category.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Main area */}
-          <div className="flex-1 overflow-hidden bg-gray-900 relative">
-            {selectedCategory === 'home' ? (
-              <div className="h-full flex flex-col relative">
-                <div className="pt-10 px-8 pb-8 flex flex-col items-start text-left z-10">
-                  <h1 className="text-5xl font-bold text-white mb-4">My Skills</h1>
-                  <p className="text-gray-200 text-lg max-w-3xl leading-relaxed mb-6">
-                    I'm a Full Stack Developer with a strong foundation in building scalable web applications and mobile backends. With a solid grasp of cybersecurity principles and secure coding practices, I focus on writing clean, reliable code while designing systems that are resilient to real‑world threats. My experience across frontend, backend, and security allows me to build and protect robust applications end‑to‑end.
-                  </p>
-                  <motion.button
-                    onClick={handleContactClick}
-                    className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold rounded-full shadow-lg hover:shadow-yellow-500/50 transition-shadow flex items-center gap-2"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Mail size={20} />
-                    Contact Me
-                  </motion.button>
-                </div>
-                <div className="flex-1" />
-                <ArcOrbitSkills />
-              </div>
-            ) : (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={selectedCategory}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="p-6 overflow-auto h-full"
+        {/* Main area */}
+        <div className="flex-1 overflow-hidden bg-gray-900 relative">
+          {selectedCategory === 'home' ? (
+            <div className="h-full flex flex-col relative">
+              <div className="pt-10 px-8 pb-8 flex flex-col items-start text-left z-10">
+                <h1 className="text-5xl font-bold text-white mb-4">My Skills</h1>
+                <p className="text-gray-200 text-lg max-w-3xl leading-relaxed mb-6">
+                  I'm a Full Stack Developer with a strong foundation in building scalable web applications and mobile backends. With a solid grasp of cybersecurity principles and secure coding practices, I focus on writing clean, reliable code while designing systems that are resilient to real‑world threats. My experience across frontend, backend, and security allows me to build and protect robust applications end‑to‑end.
+                </p>
+                <motion.button
+                  onClick={handleContactClick}
+                  className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold rounded-full shadow-lg hover:shadow-yellow-500/50 transition-shadow flex items-center gap-2"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  {/* Category Header */}
-                  <div className={`mb-6 p-4 rounded-xl bg-gradient-to-r ${getGradient(getColorClass(selectedCategory))}`}>
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                      {React.createElement(skillsData[selectedCategory]?.icon, { size: 28 })}
-                      {skillsData[selectedCategory]?.title}
-                    </h2>
-                  </div>
+                  <Mail size={20} />
+                  Contact Me
+                </motion.button>
+              </div>
+              <div className="flex-1" />
+              <ArcOrbitSkills />
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedCategory}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="p-6 overflow-auto h-full"
+              >
+                {/* Category Header */}
+                <div className={`mb-6 p-4 rounded-xl bg-gradient-to-r ${getGradient(getColorClass(selectedCategory))}`}>
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    {React.createElement(skillsData[selectedCategory]?.icon, { size: 28 })}
+                    {skillsData[selectedCategory]?.title}
+                  </h2>
+                </div>
 
-                  {/* Skills Grid */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {skillsData[selectedCategory]?.skills.map((skill, index) => {
-                      const color = getColorClass(selectedCategory);
-                      const barColors = {
-                        blue: '#3b82f6',
-                        cyan: '#06b6d4',
-                        green: '#10b981',
-                        purple: '#a855f7',
-                        orange: '#f97316',
-                        yellow: '#eab308',
-                        red: '#ef4444',
-                        pink: '#ec4899',
-                      };
+                {/* Skills Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  {skillsData[selectedCategory]?.skills.map((skill, index) => {
+                    const color = getColorClass(selectedCategory);
+                    const barColors = {
+                      blue: '#3b82f6',
+                      cyan: '#06b6d4',
+                      green: '#10b981',
+                      purple: '#a855f7',
+                      orange: '#f97316',
+                      yellow: '#eab308',
+                      red: '#ef4444',
+                      pink: '#ec4899',
+                    };
 
-                      return (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="bg-gray-800 rounded-xl p-4 border border-gray-700 hover:border-gray-600 transition-all hover:shadow-lg hover:shadow-gray-700/50"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl">{skill.icon}</span>
-                              <h3 className="text-white font-medium text-sm">{skill.name}</h3>
-                            </div>
-                            <span className="text-xs font-semibold text-gray-400">
-                              {skill.level}%
-                            </span>
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="bg-gray-800 rounded-xl p-4 border border-gray-700 hover:border-gray-600 transition-all hover:shadow-lg hover:shadow-gray-700/50"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{skill.icon}</span>
+                            <h3 className="text-white font-medium text-sm">{skill.name}</h3>
                           </div>
+                          <span className="text-xs font-semibold text-gray-400">
+                            {skill.level}%
+                          </span>
+                        </div>
 
-                          <div className="relative w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${skill.level}%` }}
-                              transition={{ duration: 1, delay: index * 0.05, ease: 'easeOut' }}
-                              className="absolute top-0 left-0 h-full rounded-full"
-                              style={{ background: barColors[color] }}
-                            />
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            )}
-          </div>
+                        <div className="relative w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${skill.level}%` }}
+                            transition={{ duration: 1, delay: index * 0.05, ease: 'easeOut' }}
+                            className="absolute top-0 left-0 h-full rounded-full"
+                            style={{ background: barColors[color] }}
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
       </div>
-    </Rnd>
+    </WindowShell>
   );
 };
 

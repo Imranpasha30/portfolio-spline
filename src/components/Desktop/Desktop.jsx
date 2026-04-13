@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TerminalWindow from '../Windows/TerminalWindow';
 import FileManagerWindow from '../Windows/FileManagerWindow';
 import ProjectsWindow from '../Windows/ProjectsWindow';
@@ -9,10 +9,13 @@ import VSCodeWindow from '../Windows/VSCodeWindow';
 import SettingsWindow from '../Windows/SettingsWindow';
 import BrowserWindow from '../Windows/BrowserWindow';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Terminal, FolderOpen, Rocket, User, Lightbulb, Grid3x3, 
-    Mail, Settings, Power, Volume2, Wifi, Battery, Search
+import {
+    Terminal, FolderOpen, Rocket, User, Lightbulb, Grid3x3,
+    Mail, Settings, Power, Volume2, Wifi, Battery, Search,
+    Lock, RotateCw, PowerOff, Monitor, Image as ImageIcon
 } from 'lucide-react';
+import useWindowManager from '../../hooks/useWindowManager';
+import { useSettings } from '../../contexts/SettingsContext';
 
 // Import images
 import firefoxLogo from '/images/pngegg.png';
@@ -20,473 +23,209 @@ import trashIcon from '/images/trash.png';
 import folder from '/images/folder.png';
 import vs from '/images/vs.png';
 import mail from '/images/mail.png';
-import ubuntuWallpaper from '/wallpaper/fa993d401b720ad6599ff38a9cc62851fefaff17.jpeg';
 
-const Desktop = () => {
-    const [terminals, setTerminals] = useState([]);
-    const [fileManagers, setFileManagers] = useState([]);
-    const [projects, setProjects] = useState([]);
-    const [abouts, setAbouts] = useState([]);
-    const [skills, setSkills] = useState([]);
-    const [mails, setMails] = useState([]);
-    const [vscodes, setVSCodes] = useState([]);
-    const [settings, setSettings] = useState([]);
-    const [browsers, setBrowsers] = useState([]);
-    const [maxZIndex, setMaxZIndex] = useState(40);
-    const [windowOffset, setWindowOffset] = useState(0);
+const WINDOW_COMPONENTS = {
+    terminal: TerminalWindow,
+    browser: BrowserWindow,
+    filemanager: FileManagerWindow,
+    skills: SkillsWindow,
+    projects: ProjectsWindow,
+    about: AboutWindow,
+    mail: MailWindow,
+    vscode: VSCodeWindow,
+    settings: SettingsWindow,
+};
+
+const Desktop = ({ onLock, onShutdown }) => {
+    const wm = useWindowManager();
+    const { wallpaper, setWallpaper, panelColor, setPanelColor, launcherColor, setLauncherColor } = useSettings();
     const [showApplications, setShowApplications] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
-    
-    // Customization states
-    const [wallpaper, setWallpaper] = useState(ubuntuWallpaper);
-    const [panelColor, setPanelColor] = useState({ name: 'Dark', value: '#1a1a1a', opacity: 90 });
-    const [launcherColor, setLauncherColor] = useState({ name: 'Dark', value: '#1a1a1a', opacity: 90 });
+    const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0 });
+    const [powerMenu, setPowerMenu] = useState(false);
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    const bringToFront = (windowId, windowType) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-
-        if (windowType === 'terminal') {
-            setTerminals(prev => prev.map(t =>
-                t.id === windowId ? { ...t, zIndex: newZIndex } : t
-            ));
-        } else if (windowType === 'filemanager') {
-            setFileManagers(prev => prev.map(fm =>
-                fm.id === windowId ? { ...fm, zIndex: newZIndex } : fm
-            ));
-        } else if (windowType === 'skills') {
-            setSkills(prev => prev.map(s =>
-                s.id === windowId ? { ...s, zIndex: newZIndex } : s
-            ));
-        } else if (windowType === 'projects') {
-            setProjects(prev => prev.map(p =>
-                p.id === windowId ? { ...p, zIndex: newZIndex } : p
-            ));
-        } else if (windowType === 'about') {
-            setAbouts(prev => prev.map(a =>
-                a.id === windowId ? { ...a, zIndex: newZIndex } : a
-            ));
-        } else if (windowType === 'mail') {
-            setMails(prev => prev.map(m =>
-                m.id === windowId ? { ...m, zIndex: newZIndex } : m
-            ));
-        } else if (windowType === 'vscode') {
-            setVSCodes(prev => prev.map(v =>
-                v.id === windowId ? { ...v, zIndex: newZIndex } : v
-            ));
-        } else if (windowType === 'settings') {
-            setSettings(prev => prev.map(s =>
-                s.id === windowId ? { ...s, zIndex: newZIndex } : s
-            ));
-        } else if (windowType === 'browser') {
-            setBrowsers(prev => prev.map(b =>
-                b.id === windowId ? { ...b, zIndex: newZIndex } : b
-            ));
-        }
-    };
-
-    // Browser handlers
-    const handleBrowserOpen = () => {
-        const offset = windowOffset % 5;
-        const newBrowser = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 150 + (offset * 30),
-            offsetY: 80 + (offset * 30)
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Ctrl+Alt+T → Terminal
+            if (e.ctrlKey && e.altKey && e.key === 't') {
+                e.preventDefault();
+                openApp('terminal');
+            }
+            // Ctrl+Alt+F → File Manager
+            if (e.ctrlKey && e.altKey && e.key === 'f') {
+                e.preventDefault();
+                openApp('filemanager');
+            }
+            // Super+L → Lock
+            if (e.metaKey && e.key === 'l') {
+                e.preventDefault();
+                onLock?.();
+            }
         };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setBrowsers(prev => [...prev, newBrowser]);
-    };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onLock]);
 
-    const handleBrowserClose = (id) => {
-        setBrowsers(prev => prev.filter(b => b.id !== id));
-    };
+    // Close context menu on click
+    useEffect(() => {
+        const close = () => setContextMenu(prev => prev.visible ? { ...prev, visible: false } : prev);
+        window.addEventListener('click', close);
+        return () => window.removeEventListener('click', close);
+    }, []);
 
-    const handleBrowserMinimize = (id) => {
-        setBrowsers(prev => prev.map(b =>
-            b.id === id ? { ...b, isMinimized: true } : b
-        ));
-    };
-
-    const handleBrowserRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setBrowsers(prev => prev.map(b =>
-            b.id === id ? { ...b, isMinimized: false, zIndex: newZIndex } : b
-        ));
-    };
-
-    // Terminal handlers
-    const handleTerminalOpen = () => {
-        const offset = windowOffset % 5;
-        const newTerminal = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 150 + (offset * 30),
-            offsetY: 100 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setTerminals(prev => [...prev, newTerminal]);
-    };
-
-    const handleTerminalClose = (id) => {
-        setTerminals(prev => prev.filter(t => t.id !== id));
-    };
-
-    const handleTerminalMinimize = (id) => {
-        setTerminals(prev => prev.map(t =>
-            t.id === id ? { ...t, isMinimized: true } : t
-        ));
-    };
-
-    const handleTerminalRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setTerminals(prev => prev.map(t =>
-            t.id === id ? { ...t, isMinimized: false, zIndex: newZIndex } : t
-        ));
-    };
-
-    // File Manager handlers
-    const handleFileManagerOpen = () => {
-        const offset = windowOffset % 5;
-        const newFileManager = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 150 + (offset * 30),
-            offsetY: 80 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setFileManagers(prev => [...prev, newFileManager]);
-    };
-
-    const handleFileManagerClose = (id) => {
-        setFileManagers(prev => prev.filter(fm => fm.id !== id));
-    };
-
-    const handleFileManagerMinimize = (id) => {
-        setFileManagers(prev => prev.map(fm =>
-            fm.id === id ? { ...fm, isMinimized: true } : fm
-        ));
-    };
-
-    const handleFileManagerRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setFileManagers(prev => prev.map(fm =>
-            fm.id === id ? { ...fm, isMinimized: false, zIndex: newZIndex } : fm
-        ));
-    };
-
-    // Skills handlers
-    const handleSkillsOpen = () => {
-        const offset = windowOffset % 5;
-        const newSkill = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 160 + (offset * 30),
-            offsetY: 90 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setSkills(prev => [...prev, newSkill]);
-    };
-
-    const handleSkillsClose = (id) => {
-        setSkills(prev => prev.filter(s => s.id !== id));
-    };
-
-    const handleSkillsMinimize = (id) => {
-        setSkills(prev => prev.map(s =>
-            s.id === id ? { ...s, isMinimized: true } : s
-        ));
-    };
-
-    const handleSkillsRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setSkills(prev => prev.map(s =>
-            s.id === id ? { ...s, isMinimized: false, zIndex: newZIndex } : s
-        ));
-    };
-
-    // Projects handlers
-    const handleProjectsOpen = () => {
-        const offset = windowOffset % 5;
-        const newProject = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 200 + (offset * 30),
-            offsetY: 100 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setProjects(prev => [...prev, newProject]);
-    };
-
-    const handleProjectsClose = (id) => {
-        setProjects(prev => prev.filter(p => p.id !== id));
-    };
-
-    const handleProjectsMinimize = (id) => {
-        setProjects(prev => prev.map(p =>
-            p.id === id ? { ...p, isMinimized: true } : p
-        ));
-    };
-
-    const handleProjectsRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setProjects(prev => prev.map(p =>
-            p.id === id ? { ...p, isMinimized: false, zIndex: newZIndex } : p
-        ));
-    };
-
-    // About handlers
-    const handleAboutOpen = () => {
-        const offset = windowOffset % 5;
-        const newAbout = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 180 + (offset * 30),
-            offsetY: 120 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setAbouts(prev => [...prev, newAbout]);
-    };
-
-    const handleAboutClose = (id) => {
-        setAbouts(prev => prev.filter(a => a.id !== id));
-    };
-
-    const handleAboutMinimize = (id) => {
-        setAbouts(prev => prev.map(a =>
-            a.id === id ? { ...a, isMinimized: true } : a
-        ));
-    };
-
-    const handleAboutRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setAbouts(prev => prev.map(a =>
-            a.id === id ? { ...a, isMinimized: false, zIndex: newZIndex } : a
-        ));
-    };
-
-    // Mail handlers
-    const handleMailOpen = () => {
-        const offset = windowOffset % 5;
-        const newMail = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 180 + (offset * 30),
-            offsetY: 90 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setMails(prev => [...prev, newMail]);
-    };
-
-    const handleMailClose = (id) => {
-        setMails(prev => prev.filter(m => m.id !== id));
-    };
-
-    const handleMailMinimize = (id) => {
-        setMails(prev => prev.map(m =>
-            m.id === id ? { ...m, isMinimized: true } : m
-        ));
-    };
-
-    const handleMailRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setMails(prev => prev.map(m =>
-            m.id === id ? { ...m, isMinimized: false, zIndex: newZIndex } : m
-        ));
-    };
-
-    // VS Code handlers
-    const handleVSCodeOpen = () => {
-        const offset = windowOffset % 5;
-        const newVSCode = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 200 + (offset * 30),
-            offsetY: 100 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setVSCodes(prev => [...prev, newVSCode]);
-    };
-
-    const handleVSCodeClose = (id) => {
-        setVSCodes(prev => prev.filter(v => v.id !== id));
-    };
-
-    const handleVSCodeMinimize = (id) => {
-        setVSCodes(prev => prev.map(v =>
-            v.id === id ? { ...v, isMinimized: true } : v
-        ));
-    };
-
-    const handleVSCodeRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setVSCodes(prev => prev.map(v =>
-            v.id === id ? { ...v, isMinimized: false, zIndex: newZIndex } : v
-        ));
-    };
-
-    // Settings handlers
-    const handleSettingsOpen = () => {
-        const offset = windowOffset % 5;
-        const newSettings = {
-            id: Date.now(),
-            isMinimized: false,
-            zIndex: maxZIndex + 1,
-            offsetX: 200 + (offset * 30),
-            offsetY: 100 + (offset * 30)
-        };
-        setMaxZIndex(maxZIndex + 1);
-        setWindowOffset(windowOffset + 1);
-        setSettings(prev => [...prev, newSettings]);
-    };
-
-    const handleSettingsClose = (id) => {
-        setSettings(prev => prev.filter(s => s.id !== id));
-    };
-
-    const handleSettingsMinimize = (id) => {
-        setSettings(prev => prev.map(s =>
-            s.id === id ? { ...s, isMinimized: true } : s
-        ));
-    };
-
-    const handleSettingsRestore = (id) => {
-        const newZIndex = maxZIndex + 1;
-        setMaxZIndex(newZIndex);
-        setSettings(prev => prev.map(s =>
-            s.id === id ? { ...s, isMinimized: false, zIndex: newZIndex } : s
-        ));
-    };
-
-    const handleWallpaperChange = (newWallpaper) => {
-        setWallpaper(newWallpaper);
-    };
-
-    const handlePanelColorChange = (color) => {
-        setPanelColor(color);
-    };
-
-    const handleLauncherColorChange = (color) => {
-        setLauncherColor(color);
-    };
-
-    const allMinimizedWindows = [
-        ...terminals.filter(t => t.isMinimized).map(t => ({ ...t, type: 'terminal', name: 'Terminal' })),
-        ...fileManagers.filter(fm => fm.isMinimized).map(fm => ({ ...fm, type: 'filemanager', name: 'Files' })),
-        ...skills.filter(s => s.isMinimized).map(s => ({ ...s, type: 'skills', name: 'Skills' })),
-        ...projects.filter(p => p.isMinimized).map(p => ({ ...p, type: 'projects', name: 'Projects' })),
-        ...abouts.filter(a => a.isMinimized).map(a => ({ ...a, type: 'about', name: 'About' })),
-        ...mails.filter(m => m.isMinimized).map(m => ({ ...m, type: 'mail', name: 'Mail' })),
-        ...vscodes.filter(v => v.isMinimized).map(v => ({ ...v, type: 'vscode', name: 'VS Code' })),
-        ...settings.filter(s => s.isMinimized).map(s => ({ ...s, type: 'settings', name: 'Settings' })),
-        ...browsers.filter(b => b.isMinimized).map(b => ({ ...b, type: 'browser', name: 'Firefox' }))
-    ];
-
-    const handleRestoreWindow = (id, type) => {
-        if (type === 'terminal') handleTerminalRestore(id);
-        else if (type === 'filemanager') handleFileManagerRestore(id);
-        else if (type === 'skills') handleSkillsRestore(id);
-        else if (type === 'projects') handleProjectsRestore(id);
-        else if (type === 'about') handleAboutRestore(id);
-        else if (type === 'mail') handleMailRestore(id);
-        else if (type === 'vscode') handleVSCodeRestore(id);
-        else if (type === 'settings') handleSettingsRestore(id);
-        else if (type === 'browser') handleBrowserRestore(id);
+    const handleDesktopRightClick = (e) => {
+        // Only show on desktop background, not on windows
+        if (e.target.closest('[data-window]') || e.target.closest('button')) return;
+        e.preventDefault();
+        setContextMenu({ visible: true, x: e.clientX, y: e.clientY });
     };
 
     const formatTime = (date) => {
-        return date.toLocaleTimeString('en-US', { 
+        return date.toLocaleTimeString('en-US', {
             weekday: 'short',
             month: 'short',
             day: 'numeric',
-            hour: '2-digit', 
+            hour: '2-digit',
             minute: '2-digit',
-            hour12: false 
+            hour12: false
         });
     };
 
+    const openApp = (type) => {
+        wm.openWindow(type);
+        setShowApplications(false);
+    };
+
+    const renderWindow = (win) => {
+        const Component = WINDOW_COMPONENTS[win.type];
+        if (!Component) return null;
+
+        const baseProps = {
+            key: win.id,
+            id: win.id,
+            isMinimized: win.isMinimized,
+            zIndex: win.zIndex,
+            offsetX: win.position.x,
+            offsetY: win.position.y,
+            onClose: () => wm.closeWindow(win.id),
+            onMinimize: () => wm.minimizeWindow(win.id),
+            onFocus: () => wm.focusWindow(win.id),
+        };
+
+        // Extra props for specific window types
+        if (win.type === 'terminal') {
+            baseProps.onProjectsOpen = () => openApp('projects');
+            baseProps.onSkillsOpen = () => openApp('skills');
+            baseProps.onAboutOpen = () => openApp('about');
+            baseProps.onMailOpen = () => openApp('mail');
+            baseProps.onFileManagerOpen = () => openApp('filemanager');
+            baseProps.onVSCodeOpen = () => openApp('vscode');
+            baseProps.onSettingsOpen = () => openApp('settings');
+            baseProps.onBrowserOpen = () => openApp('browser');
+        }
+
+        if (win.type === 'skills') {
+            baseProps.onOpenMail = () => openApp('mail');
+        }
+
+        if (win.type === 'settings') {
+            baseProps.currentWallpaper = wallpaper;
+            baseProps.onWallpaperChange = setWallpaper;
+            baseProps.currentPanelColor = panelColor;
+            baseProps.onPanelColorChange = setPanelColor;
+            baseProps.currentLauncherColor = launcherColor;
+            baseProps.onLauncherColorChange = setLauncherColor;
+        }
+
+        return <Component {...baseProps} />;
+    };
+
     return (
-        <div className="relative w-screen h-screen overflow-hidden">
+        <div className="relative w-screen h-screen overflow-hidden" onContextMenu={handleDesktopRightClick}>
             {/* Ubuntu Wallpaper */}
-            <div 
+            <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
-                style={{
-                    backgroundImage: `url(${wallpaper})`
-                }}
+                style={{ backgroundImage: `url(${wallpaper})` }}
             />
 
             {/* Top Bar */}
-            <div 
+            <div
                 className="absolute top-0 left-0 right-0 h-7 backdrop-blur-sm flex items-center justify-between px-2 z-50 text-white text-xs transition-all duration-300"
                 style={{
                     backgroundColor: `${panelColor.value}${Math.round((panelColor.opacity / 100) * 255).toString(16).padStart(2, '0')}`
                 }}
             >
-                {/* Left: Activities */}
                 <div className="flex items-center gap-4">
-                    <div className="px-3 py-0.5 font-medium text-white/90">
-                        Activities
-                    </div>
-                    {allMinimizedWindows.length > 0 && (
-                        <span className="text-white/90">{allMinimizedWindows[allMinimizedWindows.length - 1].name}</span>
+                    <div className="px-3 py-0.5 font-medium text-white/90">Activities</div>
+                    {wm.minimizedWindows.length > 0 && (
+                        <span className="text-white/90">{wm.minimizedWindows[wm.minimizedWindows.length - 1].name}</span>
                     )}
                 </div>
-
-                {/* Center: Date & Time */}
                 <button className="hover:bg-white/10 px-3 py-0.5 rounded transition-colors">
                     {formatTime(currentTime)}
                 </button>
-
-                {/* Right: System Tray */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 relative">
                     <button className="hover:bg-white/10 p-1 rounded"><Volume2 size={14} /></button>
                     <button className="hover:bg-white/10 p-1 rounded"><Wifi size={14} /></button>
                     <button className="hover:bg-white/10 p-1 rounded"><Battery size={14} /></button>
-                    <button className="hover:bg-white/10 p-1 rounded"><Power size={12} /></button>
+                    <button
+                        className="hover:bg-white/10 p-1 rounded"
+                        onClick={() => setPowerMenu(!powerMenu)}
+                    >
+                        <Power size={12} />
+                    </button>
+
+                    {/* Power Menu Dropdown */}
+                    <AnimatePresence>
+                        {powerMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -5 }}
+                                className="absolute top-full right-0 mt-1 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-lg shadow-2xl py-2 min-w-[180px] z-[60]"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button
+                                    onClick={() => { setPowerMenu(false); openApp('settings'); }}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                                >
+                                    <Settings size={14} /> Settings
+                                </button>
+                                <div className="border-t border-gray-700 my-1" />
+                                <button
+                                    onClick={() => { setPowerMenu(false); onLock?.(); }}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                                >
+                                    <Lock size={14} /> Lock Screen
+                                </button>
+                                <button
+                                    onClick={() => { setPowerMenu(false); onShutdown?.('restart'); }}
+                                    className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                                >
+                                    <RotateCw size={14} /> Restart
+                                </button>
+                                <button
+                                    onClick={() => { setPowerMenu(false); onShutdown?.('shutdown'); }}
+                                    className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-white/10 flex items-center gap-3"
+                                >
+                                    <PowerOff size={14} /> Power Off
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
             {/* Left Launcher */}
             <UbuntuLauncher
-                onTerminalClick={handleTerminalOpen}
-                onFileManagerClick={handleFileManagerOpen}
-                onSkillsClick={handleSkillsOpen}
-                onProjectsClick={handleProjectsOpen}
-                onAboutClick={handleAboutOpen}
-                onMailClick={handleMailOpen}
-                onVSCodeClick={handleVSCodeOpen}
-                onSettingsClick={handleSettingsOpen}
-                onBrowserClick={handleBrowserOpen}
-                minimizedWindows={allMinimizedWindows}
+                onAppClick={openApp}
+                minimizedWindows={wm.minimizedWindows}
                 onShowApplications={() => setShowApplications(!showApplications)}
                 launcherColor={launcherColor}
             />
@@ -494,146 +233,7 @@ const Desktop = () => {
             {/* Desktop Area */}
             <div className="absolute inset-0 pt-7 pl-16">
                 <div className="relative w-full h-full">
-                    {terminals.map(terminal => (
-                        <TerminalWindow
-                            key={terminal.id}
-                            id={terminal.id}
-                            isMinimized={terminal.isMinimized}
-                            zIndex={terminal.zIndex}
-                            offsetX={terminal.offsetX}
-                            offsetY={terminal.offsetY}
-                            onClose={() => handleTerminalClose(terminal.id)}
-                            onMinimize={() => handleTerminalMinimize(terminal.id)}
-                            onProjectsOpen={handleProjectsOpen}
-                            onSkillsOpen={handleSkillsOpen}
-                            onAboutOpen={handleAboutOpen}
-                            onMailOpen={handleMailOpen}
-                            onFileManagerOpen={handleFileManagerOpen}
-                            onVSCodeOpen={handleVSCodeOpen}
-                            onSettingsOpen={handleSettingsOpen}
-                            onBrowserOpen={handleBrowserOpen}
-                            onFocus={() => bringToFront(terminal.id, 'terminal')}
-                        />
-                    ))}
-
-                    {browsers.map(browser => (
-                        <BrowserWindow
-                            key={browser.id}
-                            id={browser.id}
-                            isMinimized={browser.isMinimized}
-                            zIndex={browser.zIndex}
-                            offsetX={browser.offsetX}
-                            offsetY={browser.offsetY}
-                            onClose={() => handleBrowserClose(browser.id)}
-                            onMinimize={() => handleBrowserMinimize(browser.id)}
-                            onFocus={() => bringToFront(browser.id, 'browser')}
-                        />
-                    ))}
-
-                    {fileManagers.map(fm => (
-                        <FileManagerWindow
-                            key={fm.id}
-                            id={fm.id}
-                            isMinimized={fm.isMinimized}
-                            zIndex={fm.zIndex}
-                            offsetX={fm.offsetX}
-                            offsetY={fm.offsetY}
-                            onClose={() => handleFileManagerClose(fm.id)}
-                            onMinimize={() => handleFileManagerMinimize(fm.id)}
-                            onFocus={() => bringToFront(fm.id, 'filemanager')}
-                        />
-                    ))}
-
-                    {skills.map(skill => (
-                        <SkillsWindow
-                            key={skill.id}
-                            id={skill.id}
-                            isMinimized={skill.isMinimized}
-                            zIndex={skill.zIndex}
-                            offsetX={skill.offsetX}
-                            offsetY={skill.offsetY}
-                            onOpenMail={handleMailOpen}
-                            onClose={() => handleSkillsClose(skill.id)}
-                            onMinimize={() => handleSkillsMinimize(skill.id)}
-                            onFocus={() => bringToFront(skill.id, 'skills')}
-                        />
-                    ))}
-
-                    {projects.map(project => (
-                        <ProjectsWindow
-                            key={project.id}
-                            id={project.id}
-                            isMinimized={project.isMinimized}
-                            zIndex={project.zIndex}
-                            offsetX={project.offsetX}
-                            offsetY={project.offsetY}
-                            onClose={() => handleProjectsClose(project.id)}
-                            onMinimize={() => handleProjectsMinimize(project.id)}
-                            onFocus={() => bringToFront(project.id, 'projects')}
-                        />
-                    ))}
-
-                    {abouts.map(about => (
-                        <AboutWindow
-                            key={about.id}
-                            id={about.id}
-                            isMinimized={about.isMinimized}
-                            zIndex={about.zIndex}
-                            offsetX={about.offsetX}
-                            offsetY={about.offsetY}
-                            onClose={() => handleAboutClose(about.id)}
-                            onMinimize={() => handleAboutMinimize(about.id)}
-                            onFocus={() => bringToFront(about.id, 'about')}
-                        />
-                    ))}
-
-                    {mails.map(mailWindow => (
-                        <MailWindow
-                            key={mailWindow.id}
-                            id={mailWindow.id}
-                            isMinimized={mailWindow.isMinimized}
-                            zIndex={mailWindow.zIndex}
-                            offsetX={mailWindow.offsetX}
-                            offsetY={mailWindow.offsetY}
-                            onClose={() => handleMailClose(mailWindow.id)}
-                            onMinimize={() => handleMailMinimize(mailWindow.id)}
-                            onFocus={() => bringToFront(mailWindow.id, 'mail')}
-                        />
-                    ))}
-
-                    {vscodes.map(vscode => (
-                        <VSCodeWindow
-                            key={vscode.id}
-                            id={vscode.id}
-                            isMinimized={vscode.isMinimized}
-                            zIndex={vscode.zIndex}
-                            offsetX={vscode.offsetX}
-                            offsetY={vscode.offsetY}
-                            onClose={() => handleVSCodeClose(vscode.id)}
-                            onMinimize={() => handleVSCodeMinimize(vscode.id)}
-                            onFocus={() => bringToFront(vscode.id, 'vscode')}
-                        />
-                    ))}
-
-                    {settings.map(setting => (
-                        <SettingsWindow
-                            key={setting.id}
-                            id={setting.id}
-                            isMinimized={setting.isMinimized}
-                            zIndex={setting.zIndex}
-                            offsetX={setting.offsetX}
-                            offsetY={setting.offsetY}
-                            onClose={() => handleSettingsClose(setting.id)}
-                            onMinimize={() => handleSettingsMinimize(setting.id)}
-                            onFocus={() => bringToFront(setting.id, 'settings')}
-                            currentWallpaper={wallpaper}
-                            onWallpaperChange={handleWallpaperChange}
-                            currentPanelColor={panelColor}
-                            onPanelColorChange={handlePanelColorChange}
-                            currentLauncherColor={launcherColor}
-                            onLauncherColorChange={handleLauncherColorChange}
-                        />
-                    ))}
+                    {wm.windows.map(renderWindow)}
                 </div>
             </div>
 
@@ -642,37 +242,58 @@ const Desktop = () => {
                 {showApplications && (
                     <ApplicationsGrid
                         onClose={() => setShowApplications(false)}
-                        onTerminalClick={() => { handleTerminalOpen(); setShowApplications(false); }}
-                        onFileManagerClick={() => { handleFileManagerOpen(); setShowApplications(false); }}
-                        onSkillsClick={() => { handleSkillsOpen(); setShowApplications(false); }}
-                        onProjectsClick={() => { handleProjectsOpen(); setShowApplications(false); }}
-                        onAboutClick={() => { handleAboutOpen(); setShowApplications(false); }}
-                        onMailClick={() => { handleMailOpen(); setShowApplications(false); }}
-                        onVSCodeClick={() => { handleVSCodeOpen(); setShowApplications(false); }}
-                        onSettingsClick={() => { handleSettingsOpen(); setShowApplications(false); }}
-                        onBrowserClick={() => { handleBrowserOpen(); setShowApplications(false); }}
+                        onAppClick={openApp}
                     />
                 )}
             </AnimatePresence>
+
+            {/* Right-Click Context Menu */}
+            {contextMenu.visible && (
+                <div
+                    className="fixed bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-lg shadow-2xl py-2 min-w-[200px] z-[60]"
+                    style={{ left: contextMenu.x, top: contextMenu.y }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button
+                        onClick={() => { setContextMenu({ ...contextMenu, visible: false }); openApp('terminal'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    >
+                        <Terminal size={14} /> Open Terminal
+                    </button>
+                    <button
+                        onClick={() => { setContextMenu({ ...contextMenu, visible: false }); openApp('filemanager'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    >
+                        <FolderOpen size={14} /> Open File Manager
+                    </button>
+                    <div className="border-t border-gray-700 my-1" />
+                    <button
+                        onClick={() => { setContextMenu({ ...contextMenu, visible: false }); openApp('settings'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    >
+                        <ImageIcon size={14} /> Change Wallpaper
+                    </button>
+                    <button
+                        onClick={() => { setContextMenu({ ...contextMenu, visible: false }); openApp('settings'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    >
+                        <Monitor size={14} /> Display Settings
+                    </button>
+                    <div className="border-t border-gray-700 my-1" />
+                    <button
+                        onClick={() => { setContextMenu({ ...contextMenu, visible: false }); openApp('about'); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/10 flex items-center gap-3"
+                    >
+                        <User size={14} /> About This Computer
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
 
 // Ubuntu Launcher (Left Sidebar)
-const UbuntuLauncher = ({ 
-    onTerminalClick, 
-    onFileManagerClick, 
-    onSkillsClick, 
-    onProjectsClick, 
-    onAboutClick,
-    onMailClick,
-    onVSCodeClick,
-    onSettingsClick,
-    onBrowserClick,
-    minimizedWindows,
-    onShowApplications,
-    launcherColor
-}) => {
+const UbuntuLauncher = ({ onAppClick, minimizedWindows, onShowApplications, launcherColor }) => {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -681,15 +302,15 @@ const UbuntuLauncher = ({
 
     const launcherItems = [
         { id: 'grid', name: 'Show Applications', icon: Grid3x3, onClick: onShowApplications, special: true },
-        { id: 'firefox', name: 'Firefox', isImage: true, imageSrc: firefoxLogo, onClick: onBrowserClick, type: 'browser' },
-        { id: 'files', name: 'Files', isImage: true, onClick: onFileManagerClick, imageSrc: folder, type: 'filemanager' },
-        { id: 'skills', name: 'Skills', icon: Lightbulb, onClick: onSkillsClick, type: 'skills', color: 'bg-yellow-500' },
-        { id: 'projects', name: 'Projects', icon: Rocket, onClick: onProjectsClick, type: 'projects', color: 'bg-purple-500' },
-        { id: 'about', name: 'About', icon: User, onClick: onAboutClick, type: 'about', color: 'bg-green-500' },
-        { id: 'terminal', name: 'Terminal', icon: Terminal, onClick: onTerminalClick, type: 'terminal', color: 'bg-gray-700' },
-        { id: 'mail', name: 'Mail', isImage: true, imageSrc: mail, onClick: onMailClick, type: 'mail' },
-        { id: 'code', name: 'VS Code', isImage: true, imageSrc: vs, onClick: onVSCodeClick, type: 'vscode' },
-        { id: 'settings', name: 'Settings', icon: Settings, onClick: onSettingsClick, type: 'settings', color: 'bg-gray-600' },
+        { id: 'firefox', name: 'Firefox', isImage: true, imageSrc: firefoxLogo, type: 'browser' },
+        { id: 'files', name: 'Files', isImage: true, imageSrc: folder, type: 'filemanager' },
+        { id: 'skills', name: 'Skills', icon: Lightbulb, type: 'skills', color: 'bg-yellow-500' },
+        { id: 'projects', name: 'Projects', icon: Rocket, type: 'projects', color: 'bg-purple-500' },
+        { id: 'about', name: 'About', icon: User, type: 'about', color: 'bg-green-500' },
+        { id: 'terminal', name: 'Terminal', icon: Terminal, type: 'terminal', color: 'bg-gray-700' },
+        { id: 'mail', name: 'Mail', isImage: true, imageSrc: mail, type: 'mail' },
+        { id: 'code', name: 'VS Code', isImage: true, imageSrc: vs, type: 'vscode' },
+        { id: 'settings', name: 'Settings', icon: Settings, type: 'settings', color: 'bg-gray-600' },
         { id: 'trash', name: 'Trash', isImage: true, imageSrc: trashIcon, bottom: true },
     ];
 
@@ -704,6 +325,14 @@ const UbuntuLauncher = ({
         const IconComponent = item.icon;
         const running = isAppRunning(item.type);
 
+        const handleClick = () => {
+            if (item.special) {
+                item.onClick();
+            } else if (item.type) {
+                onAppClick(item.type);
+            }
+        };
+
         return (
             <motion.div
                 initial={mounted ? false : { opacity: 0, x: -20 }}
@@ -711,17 +340,15 @@ const UbuntuLauncher = ({
                 transition={{ delay: mounted ? 0 : index * 0.03 }}
                 className="relative group"
             >
-                {/* Tooltip */}
                 <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 bg-gray-900/95 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none z-50 shadow-lg">
                     {item.name}
                 </div>
 
-                {/* Icon Button */}
                 <button
-                    onClick={item.onClick}
+                    onClick={handleClick}
                     className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 ${
-                        item.special 
-                            ? 'bg-transparent border border-white/20 hover:bg-white/10' 
+                        item.special
+                            ? 'bg-transparent border border-white/20 hover:bg-white/10'
                             : 'hover:bg-white/10'
                     }`}
                 >
@@ -729,9 +356,9 @@ const UbuntuLauncher = ({
                         <Grid3x3 className="text-white" size={18} />
                     ) : item.isImage ? (
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                            <img 
-                                src={item.imageSrc} 
-                                alt={item.name} 
+                            <img
+                                src={item.imageSrc}
+                                alt={item.name}
                                 className="w-9 h-9 object-contain"
                             />
                         </div>
@@ -742,7 +369,6 @@ const UbuntuLauncher = ({
                     )}
                 </button>
 
-                {/* Running Indicator */}
                 {running && !item.special && (
                     <motion.div
                         initial={{ scale: 0 }}
@@ -755,20 +381,17 @@ const UbuntuLauncher = ({
     };
 
     return (
-        <div 
+        <div
             className="absolute left-0 top-7 bottom-0 w-16 backdrop-blur-sm flex flex-col items-center pt-2 z-40 transition-all duration-300"
             style={{
                 backgroundColor: `${launcherColor.value}${Math.round((launcherColor.opacity / 100) * 255).toString(16).padStart(2, '0')}`
             }}
         >
-            {/* Top Icons */}
             <div className="flex flex-col items-center gap-1">
                 {normalIcons.map((item, index) => (
                     <LauncherIcon key={item.id} item={item} index={index} />
                 ))}
             </div>
-
-            {/* Bottom Icons */}
             <div className="flex-1" />
             <div className="flex flex-col items-center gap-1 pb-2">
                 {bottomIcons.map((item, index) => (
@@ -780,28 +403,17 @@ const UbuntuLauncher = ({
 };
 
 // Applications Grid
-const ApplicationsGrid = ({ 
-    onClose, 
-    onTerminalClick, 
-    onFileManagerClick, 
-    onSkillsClick, 
-    onProjectsClick, 
-    onAboutClick,
-    onMailClick,
-    onVSCodeClick,
-    onSettingsClick,
-    onBrowserClick
-}) => {
+const ApplicationsGrid = ({ onClose, onAppClick }) => {
     const apps = [
-        { name: 'Firefox', isImage: true, imageSrc: firefoxLogo, onClick: onBrowserClick },
-        { name: 'Files', isImage: true, imageSrc: folder, onClick: onFileManagerClick },
-        { name: 'Terminal', icon: Terminal, onClick: onTerminalClick, color: 'bg-gray-700' },
-        { name: 'Skills', icon: Lightbulb, onClick: onSkillsClick, color: 'bg-yellow-500' },
-        { name: 'Projects', icon: Rocket, onClick: onProjectsClick, color: 'bg-purple-500' },
-        { name: 'About', icon: User, onClick: onAboutClick, color: 'bg-green-500' },
-        { name: 'Mail', isImage: true, imageSrc: mail, onClick: onMailClick },
-        { name: 'VS Code', isImage: true, imageSrc: vs, onClick: onVSCodeClick },
-        { name: 'Settings', icon: Settings, onClick: onSettingsClick, color: 'bg-gray-600' },
+        { name: 'Firefox', isImage: true, imageSrc: firefoxLogo, type: 'browser' },
+        { name: 'Files', isImage: true, imageSrc: folder, type: 'filemanager' },
+        { name: 'Terminal', icon: Terminal, type: 'terminal', color: 'bg-gray-700' },
+        { name: 'Skills', icon: Lightbulb, type: 'skills', color: 'bg-yellow-500' },
+        { name: 'Projects', icon: Rocket, type: 'projects', color: 'bg-purple-500' },
+        { name: 'About', icon: User, type: 'about', color: 'bg-green-500' },
+        { name: 'Mail', isImage: true, imageSrc: mail, type: 'mail' },
+        { name: 'VS Code', isImage: true, imageSrc: vs, type: 'vscode' },
+        { name: 'Settings', icon: Settings, type: 'settings', color: 'bg-gray-600' },
     ];
 
     return (
@@ -812,7 +424,6 @@ const ApplicationsGrid = ({
             className="absolute inset-0 bg-[#2d2d2d]/95 backdrop-blur-xl z-[100]"
             onClick={onClose}
         >
-            {/* Search Bar */}
             <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px]">
                 <div className="bg-[#3c3c3c] rounded-lg px-4 py-3 flex items-center gap-3 shadow-2xl">
                     <Search className="text-white/50" size={20} />
@@ -825,7 +436,6 @@ const ApplicationsGrid = ({
                 </div>
             </div>
 
-            {/* App Grid */}
             <div className="absolute top-60 left-1/2 -translate-x-1/2 w-[800px]">
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -843,14 +453,14 @@ const ApplicationsGrid = ({
                                 transition={{ delay: index * 0.05 }}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                onClick={app.onClick || onClose}
+                                onClick={() => onAppClick(app.type)}
                                 className="flex flex-col items-center gap-3 p-4 rounded-xl hover:bg-white/5 transition-colors"
                             >
                                 {app.isImage ? (
                                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl bg-white/5 overflow-hidden">
-                                        <img 
-                                            src={app.imageSrc} 
-                                            alt={app.name} 
+                                        <img
+                                            src={app.imageSrc}
+                                            alt={app.name}
                                             className="w-14 h-14 object-contain"
                                         />
                                     </div>
