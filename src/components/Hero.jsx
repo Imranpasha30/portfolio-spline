@@ -123,8 +123,41 @@ export default function Hero() {
 
         {/* Hero Visual Frame (Portrait & 3D Cyber Spider MK-IX) */}
         <div className="hero-visual">
-          {/* Visual Mode Switcher Pill */}
-          <div className="hero-visual-toggle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px' }}>
+          <div className="portrait-frame">
+            {/* Pure Crystal Glass Specular Glare & Reflection */}
+            <div className="tv-glass-glare" aria-hidden="true" />
+
+            {/* Frosted Glass Floating HUD Status (Visible in Portrait Mode) */}
+            {visualMode === 'portrait' && (
+              <div className="tv-glass-hud" aria-hidden="true">
+                <span className="tv-status-badge">
+                  <span className="tv-dot" />
+                  TRANSPARENT OLED // 120Hz
+                </span>
+                <span className="tv-tech-spec">TRANSMITTANCE 88%</span>
+              </div>
+            )}
+
+            {visualMode === 'spider' ? (
+              <CyberSpider3D height="100%" />
+            ) : identity.portrait ? (
+              <img
+                src={identity.portrait}
+                alt={identity.fullName}
+                className="portrait-img"
+                loading="eager"
+              />
+            ) : (
+              <div className="portrait-placeholder" aria-label="Abstract Monogram Art">
+                <div className="placeholder-grid" aria-hidden="true" />
+                <div className="placeholder-initials">{initials}</div>
+                <div className="placeholder-tag">DESIGN ARCHITECTURE</div>
+              </div>
+            )}
+          </div>
+
+          {/* Visual Mode Switcher Pill (Placed below the container) */}
+          <div className="hero-visual-toggle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '14px' }}>
             <button
               type="button"
               onClick={() => setVisualMode('spider')}
@@ -173,39 +206,6 @@ export default function Hero() {
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: visualMode === 'portrait' ? '#ef4151' : '#71717a' }} />
               <span>📷 PORTRAIT</span>
             </button>
-          </div>
-
-          <div className="portrait-frame">
-            {/* Pure Crystal Glass Specular Glare & Reflection */}
-            <div className="tv-glass-glare" aria-hidden="true" />
-
-            {/* Frosted Glass Floating HUD Status (Visible in Portrait Mode) */}
-            {visualMode === 'portrait' && (
-              <div className="tv-glass-hud" aria-hidden="true">
-                <span className="tv-status-badge">
-                  <span className="tv-dot" />
-                  TRANSPARENT OLED // 120Hz
-                </span>
-                <span className="tv-tech-spec">TRANSMITTANCE 88%</span>
-              </div>
-            )}
-
-            {visualMode === 'spider' ? (
-              <CyberSpider3D height="100%" />
-            ) : identity.portrait ? (
-              <img
-                src={identity.portrait}
-                alt={identity.fullName}
-                className="portrait-img"
-                loading="eager"
-              />
-            ) : (
-              <div className="portrait-placeholder" aria-label="Abstract Monogram Art">
-                <div className="placeholder-grid" aria-hidden="true" />
-                <div className="placeholder-initials">{initials}</div>
-                <div className="placeholder-tag">DESIGN ARCHITECTURE</div>
-              </div>
-            )}
           </div>
         </div>
       </div>
