@@ -1031,6 +1031,386 @@ h1, h2, h3, h4, h5, p {
 }
 
 /* ==============================================================================
+   PROJECTS 3D WEBGL STAGE & HUD (Spline / Futuristic Cyber Deck)
+   ============================================================================== */
+.projects-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 4px;
+  border-radius: var(--radius-full);
+}
+
+.view-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-mode-btn:hover {
+  color: var(--ink);
+}
+
+.view-mode-btn.active {
+  background: var(--spiderman-gradient);
+  color: #ffffff;
+  box-shadow: 0 2px 12px var(--red-glow);
+}
+
+.projects-3d-stage-wrapper {
+  position: relative;
+  width: 100%;
+  height: 780px;
+  background: radial-gradient(circle at 50% 25%, #0e1728 0%, #060910 85%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  user-select: none;
+}
+
+.projects-3d-canvas-mount {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.projects-3d-canvas-mount.cursor-grab {
+  cursor: grab;
+}
+
+.projects-3d-canvas-mount.cursor-grab:active {
+  cursor: grabbing;
+}
+
+.projects-3d-canvas-mount.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Top HUD Overlay */
+.stage-top-hud {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.stage-beacon {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(13, 18, 28, 0.78);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+}
+
+.beacon-pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 10px #00e5ff;
+  animation: pulse-beacon 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-beacon {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.beacon-text {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #f2efeb;
+  font-family: monospace;
+}
+
+.beacon-coords {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: monospace;
+  border-left: 1px solid var(--line);
+  padding-left: 10px;
+}
+
+.stage-orbit-toggle {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(13, 18, 28, 0.78);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.stage-orbit-toggle:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.stage-orbit-toggle.active {
+  background: rgba(239, 65, 81, 0.18);
+  border-color: var(--red);
+  color: #ffffff;
+}
+
+.spin-anim {
+  animation: spin-clockwise 4s linear infinite;
+}
+
+@keyframes spin-clockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Bottom HUD Dock */
+.stage-bottom-hud {
+  position: absolute;
+  bottom: 22px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.stage-hud-btn {
+  pointer-events: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(13, 18, 28, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.stage-hud-btn:hover {
+  background: rgba(239, 65, 81, 0.22);
+  border-color: var(--red);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.stage-hud-card {
+  pointer-events: auto;
+  background: rgba(13, 18, 28, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
+  padding: 14px 22px;
+  min-width: 380px;
+  max-width: 560px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  font-family: monospace;
+}
+
+.hud-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.hud-counter {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.hud-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hud-project-title {
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-chips-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hud-metric-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  background: rgba(239, 65, 81, 0.12);
+  border: 1px solid rgba(239, 65, 81, 0.3);
+  color: #f2efeb;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.hud-metric-pill strong {
+  color: var(--red);
+}
+
+.hud-tool-pill {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+}
+
+.hud-dots-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.hud-dot {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.hud-dot:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.hud-dot.active {
+  width: 32px;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red-glow);
+}
+
+.stage-cta-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--spiderman-gradient);
+  border: none;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 12px 20px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 8px 24px var(--red-glow);
+  white-space: nowrap;
+}
+
+.stage-cta-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 30px var(--red-glow);
+}
+
+@media (max-width: 900px) {
+  .projects-3d-stage-wrapper {
+    height: 660px;
+  }
+  .stage-top-hud {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .stage-bottom-hud {
+    flex-wrap: wrap;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    gap: 8px;
+  }
+  .stage-hud-card {
+    min-width: 0;
+    max-width: 100%;
+    order: -1;
+    width: 100%;
+    padding: 10px 14px;
+  }
+  .hud-project-title {
+    font-size: 16px;
+  }
+  .stage-cta-btn {
+    padding: 10px 16px;
+    font-size: 11px;
+    flex-grow: 1;
+    justify-content: center;
+  }
+  .beacon-coords {
+    display: none;
+  }
+}
+
+/* ==============================================================================
    PROJECTS GRID & CARDS
    ============================================================================== */
 .projects-grid {
