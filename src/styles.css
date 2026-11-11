@@ -3034,12 +3034,23 @@ html[data-motion="off"] *::after {
   justify-content: space-between;
   padding-top: clamp(20px, 3vh, 32px);
   padding-bottom: clamp(12px, 1.8vh, 20px);
-  background: #05060a;
+  background: #040508;
   background-image: 
-    radial-gradient(circle at 45% 45%, rgba(239, 65, 81, 0.12) 0%, rgba(239, 65, 81, 0.04) 42%, transparent 70%);
+    radial-gradient(ellipse 65% 55% at 20% 40%, rgba(0, 102, 255, 0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 80% 60%, rgba(239, 65, 81, 0.04) 0%, transparent 65%);
 }
 
-/* Pinned Header: "PROJECTS." matching Image 1-5 */
+/* Dynamic 3D Galaxy & Starfield Warp Canvas */
+.projects-galaxy-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Pinned Header: "PROJECTS." */
 .projects-pinned-header {
   position: relative;
   z-index: 30;
@@ -3123,32 +3134,7 @@ html[data-motion="off"] *::after {
   perspective: 1200px;
   transform-style: preserve-3d;
   overflow: visible;
-}
-
-/* Ambient Glowing Solar Core behind the grid (as in Image 1-5) */
-.center-solar-core {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 220px;
-  height: 220px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 59, 48, 0.85) 25%,
-    rgba(239, 65, 81, 0.55) 55%,
-    rgba(239, 65, 81, 0.18) 75%,
-    transparent 100%
-  );
-  box-shadow: 
-    0 0 70px rgba(239, 65, 81, 0.85),
-    0 0 140px rgba(239, 65, 81, 0.45);
-  filter: blur(8px);
-  pointer-events: none;
-  z-index: 1;
-  will-change: transform, opacity;
+  z-index: 10;
 }
 
 /* 3-Column Bento Grid Container */
@@ -3176,7 +3162,7 @@ html[data-motion="off"] *::after {
   }
 }
 
-/* Individual Grid Project Card matching Image 5 */
+/* Individual Grid Project Card */
 .grid-project-card {
   position: relative;
   height: 215px;

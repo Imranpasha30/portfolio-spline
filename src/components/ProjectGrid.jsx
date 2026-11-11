@@ -137,15 +137,221 @@ function ProjectCardContent({ project }) {
 // 8 Featured Production Projects
 const DISPLAY_PROJECTS = projects.slice(0, 8);
 
+/**
+ * High-performance 3D Galaxy & Starfield Travel Hook
+ * Renders hundreds of cosmic stars drifting in 3D and stretching into
+ * hyperspace warp streaks as the user scrolls through the galaxy.
+ */
+function useGalaxyStarfield(canvasRef) {
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId = null;
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let cx = 0;
+    let cy = 0;
+
+    const STAR_COUNT = 850;
+    const MAX_DEPTH = 2200;
+    const MIN_DEPTH = 30;
+    const FOCAL_LENGTH = 650;
+
+    const colors = [
+      '#ffffff', '#ffffff', '#ffffff', '#f8fafc', // 70% pure starlight
+      '#60a5fa', '#38bdf8', '#93c5fd',             // 20% electric sapphire
+      '#ef4151', '#f43f5e'                         // 10% crimson stardust
+    ];
+
+    function createStar(initialZ = null) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 1200 + 40;
+      return {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+        z: initialZ !== null ? initialZ : Math.random() * MAX_DEPTH + MIN_DEPTH,
+        prevZ: initialZ !== null ? initialZ : MAX_DEPTH,
+        size: Math.random() * 1.6 + 0.6,
+        alpha: Math.random() * 0.65 + 0.35,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        twinkleSpeed: Math.random() * 0.03 + 0.015,
+        twinklePhase: Math.random() * Math.PI * 2
+      };
+    }
+
+    const stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+      stars.push(createStar(Math.random() * MAX_DEPTH + MIN_DEPTH));
+    }
+
+    function resize() {
+      if (!canvas) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.scale(dpr, dpr);
+      cx = width / 2;
+      cy = height / 2;
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Track directional scroll & wheel velocity for forward & reverse hyperspace travel
+    let lastScrollY = window.scrollY;
+    let scrollVelocity = 0;
+
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY;
+      const clampedDelta = Math.max(-60, Math.min(60, delta));
+      // Positive when scrolling down (forward travel), Negative when scrolling up (reverse travel)
+      scrollVelocity = Math.max(-50, Math.min(50, scrollVelocity + clampedDelta * 0.6));
+      lastScrollY = currentScrollY;
+    };
+
+    const onWheel = (e) => {
+      const clampedWheel = Math.max(-40, Math.min(40, e.deltaY));
+      scrollVelocity = Math.max(-50, Math.min(50, scrollVelocity + clampedWheel * 0.45));
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel', onWheel, { passive: true });
+
+    let currentSpeed = 1.3;
+
+    function render(time) {
+      // Smooth friction dampening towards 0
+      scrollVelocity *= 0.90;
+
+      // Target speed: default idle forward drift (+1.3) + directional scroll velocity
+      // When scrolling up/back, targetSpeed becomes negative (reversing star movement)
+      const targetSpeed = 1.3 + scrollVelocity * 1.65;
+      currentSpeed += (targetSpeed - currentSpeed) * 0.16;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Subtle, ethereal cosmic nebula dust clouds (No harsh hotspots)
+      const grad1 = ctx.createRadialGradient(cx - width * 0.25, cy + height * 0.12, 10, cx - width * 0.25, cy + height * 0.12, width * 0.42);
+      grad1.addColorStop(0, 'rgba(0, 102, 255, 0.032)');
+      grad1.addColorStop(1, 'rgba(0, 102, 255, 0)');
+      ctx.fillStyle = grad1;
+      ctx.fillRect(0, 0, width, height);
+
+      const grad2 = ctx.createRadialGradient(cx + width * 0.28, cy - height * 0.1, 10, cx + width * 0.28, cy - height * 0.1, width * 0.4);
+      grad2.addColorStop(0, 'rgba(239, 65, 81, 0.028)');
+      grad2.addColorStop(1, 'rgba(239, 65, 81, 0)');
+      ctx.fillStyle = grad2;
+      ctx.fillRect(0, 0, width, height);
+
+      // 2. Render all stars & bidirectional warp streaks
+      const speedMagnitude = Math.abs(currentSpeed);
+      const isWarping = speedMagnitude > 2.8;
+
+      for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
+        star.prevZ = star.z;
+        star.z -= currentSpeed;
+
+        // Wrap around boundaries for forward and reverse motion
+        if (currentSpeed > 0 && star.z <= MIN_DEPTH) {
+          // Traveling forward: wrap from camera to deep cosmic horizon
+          star.z = MAX_DEPTH;
+          star.prevZ = MAX_DEPTH;
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * 1200 + 40;
+          star.x = Math.cos(angle) * radius;
+          star.y = Math.sin(angle) * radius;
+        } else if (currentSpeed < 0 && star.z >= MAX_DEPTH) {
+          // Traveling in reverse: wrap from cosmic horizon to foreground near camera
+          star.z = MIN_DEPTH + Math.random() * 25;
+          star.prevZ = star.z;
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * 1200 + 40;
+          star.x = Math.cos(angle) * radius;
+          star.y = Math.sin(angle) * radius;
+        }
+
+        // Current 2D projection
+        const safeZ = Math.max(MIN_DEPTH, star.z);
+        const k = FOCAL_LENGTH / safeZ;
+        const sx = star.x * k + cx;
+        const sy = star.y * k + cy;
+
+        // Clip offscreen
+        if (sx < -40 || sx > width + 40 || sy < -40 || sy > height + 40) {
+          continue;
+        }
+
+        const depthRatio = Math.max(0, Math.min(1, 1 - safeZ / MAX_DEPTH));
+        const twinkle = 0.85 + 0.15 * Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+        const alpha = Math.min(1, Math.max(0.12, star.alpha * depthRatio * 1.35 * twinkle));
+
+        ctx.fillStyle = star.color;
+        ctx.globalAlpha = alpha;
+
+        if (isWarping) {
+          // Relativistic warp streak along star's directional vector (forward or reverse)
+          const safePrevZ = Math.max(MIN_DEPTH, star.prevZ);
+          const prevK = FOCAL_LENGTH / safePrevZ;
+          const px = star.x * prevK + cx;
+          const py = star.y * prevK + cy;
+
+          ctx.strokeStyle = star.color;
+          ctx.lineWidth = Math.max(0.7, star.size * depthRatio * 1.25);
+          ctx.beginPath();
+          ctx.moveTo(px, py);
+          ctx.lineTo(sx, sy);
+          ctx.stroke();
+        } else {
+          // Circular star point with soft radiance
+          const r = Math.max(0.65, star.size * depthRatio * 1.6);
+          ctx.beginPath();
+          ctx.arc(sx, sy, r, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (r > 1.8 && alpha > 0.6) {
+            ctx.globalAlpha = alpha * 0.25;
+            ctx.beginPath();
+            ctx.arc(sx, sy, r * 2.4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      ctx.globalAlpha = 1;
+      animId = requestAnimationFrame(render);
+    }
+
+    animId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onWheel);
+    };
+  }, [canvasRef]);
+}
+
 export default function ProjectGrid() {
   const [activeProject, setActiveProject] = useState(null);
 
   const wrapperRef = useRef(null);
   const stageRef = useRef(null);
-  const solarCoreRef = useRef(null);
+  const galaxyCanvasRef = useRef(null);
   const gridContainerRef = useRef(null);
   const cardsRef = useRef([]);
   const masterScrollTriggerRef = useRef(null);
+
+  // Initialize interactive 3D Galaxy Starfield Voyage
+  useGalaxyStarfield(galaxyCanvasRef);
 
   // 3D Card Hover Tilt when assembled in grid
   const handleCardMouseMove = (e, cardEl) => {
@@ -209,23 +415,7 @@ export default function ProjectGrid() {
         // Clear existing tweens if re-running
         tl.clear();
 
-        // 1. Central Solar Core Glow Animation
-        if (solarCoreRef.current) {
-          tl.fromTo(
-            solarCoreRef.current,
-            { scale: 0.3, opacity: 0.3 },
-            { scale: 1.4, opacity: 0.95, duration: 1.5, ease: 'sine.inOut' },
-            0
-          );
-          // Scale back softly behind the grid as cards assemble
-          tl.to(
-            solarCoreRef.current,
-            { scale: 1.0, opacity: 0.55, duration: 1.5, ease: 'power2.out' },
-            2.2
-          );
-        }
-
-        // 2. Cards Animation: Center Inception -> 3D Round -> Snap into 3-Column Grid
+        // Cards Animation: Cosmic Void Inception -> 3D Round through Stars -> Snap into 3-Column Grid
         cards.forEach((card, i) => {
           const cardRect = card.getBoundingClientRect();
           const cardCenterX = cardRect.left + cardRect.width / 2;
@@ -235,7 +425,7 @@ export default function ProjectGrid() {
           const dx = Math.round(stageCenterX - cardCenterX);
           const dy = Math.round(stageCenterY - cardCenterY);
 
-          // Parametric angles for the 3D "Round"
+          // Parametric angles for the 3D "Round" through galaxy
           const angle1 = (i / N) * Math.PI * 2 - 0.6;
           const x1 = dx + Math.round(360 * Math.cos(angle1));
           const y1 = dy + Math.round(160 * Math.sin(angle1));
@@ -250,7 +440,7 @@ export default function ProjectGrid() {
 
           const startTime = i * 0.14;
 
-          // Waypoint 0 (Start): Tiny cards emerging deep in the glowing red center
+          // Waypoint 0 (Start): Tiny cards emerging deep in the cosmic void
           gsap.set(card, {
             x: dx,
             y: dy,
@@ -262,7 +452,7 @@ export default function ProjectGrid() {
             transformPerspective: 1200
           });
 
-          // Phase 1 (0 -> 1.0s): Stream outward along the 3D loop ("come do a round")
+          // Phase 1 (0 -> 1.0s): Stream outward along the 3D loop through stars
           tl.to(
             card,
             {
@@ -400,7 +590,7 @@ export default function ProjectGrid() {
         {/* Scroll Prompt Indicator */}
         <div className="scroll-prompt-indicator">
           <span className="scroll-prompt-text">
-            Scroll down for <strong style={{ color: '#ef4151' }}>3D Emergence &rarr; 3-Col Bento Grid</strong>
+            Scroll down for <strong style={{ color: '#ef4151' }}>Galaxy Fly-Through &rarr; 3-Col Bento Grid</strong>
           </span>
           <div className="scroll-prompt-pill" aria-hidden="true">
             <div className="scroll-prompt-dot" />
@@ -409,7 +599,7 @@ export default function ProjectGrid() {
       </section>
 
       {/* =====================================================================
-           MASTER PINNED 3D CENTER -> ROUND -> GRID EXPERIENCE
+           MASTER PINNED GALAXY & STARFIELD 3D EXPERIENCE
            ===================================================================== */}
       <div 
         ref={wrapperRef} 
@@ -421,7 +611,14 @@ export default function ProjectGrid() {
           id="projects-pinned-stage" 
           className="projects-pinned-stage select-none"
         >
-          {/* Pinned Top-Center Header matching User Photo 1-5 */}
+          {/* Dynamic 3D Galaxy & Starfield Warp Canvas */}
+          <canvas 
+            ref={galaxyCanvasRef} 
+            className="projects-galaxy-canvas" 
+            aria-hidden="true" 
+          />
+
+          {/* Pinned Top-Center Header */}
           <div className="projects-pinned-header">
             <div className="projects-orbit-badge">
               <span className="orbit-badge-dot" />
@@ -433,21 +630,14 @@ export default function ProjectGrid() {
             </h2>
 
             <div className="projects-stage-subtext">
-              <span className="active-stage-label">3D FORMATION</span>
+              <span className="active-stage-label">COSMIC VOYAGE</span>
               <span>&bull;</span>
-              <span>CLICK ANY PROJECT TO INSPECT SYSTEM ARCHITECTURE</span>
+              <span>SCROLL TO TRAVEL THROUGH GALAXY &bull; CLICK ANY PROJECT TO INSPECT</span>
             </div>
           </div>
 
           {/* MAIN 3D PERSPECTIVE VIEWPORT */}
           <div className="projects-stage-viewport">
-            {/* Ambient Glowing Solar Core in Center */}
-            <div 
-              ref={solarCoreRef} 
-              className="center-solar-core" 
-              aria-hidden="true" 
-            />
-
             {/* 3-Column Bento Grid Container */}
             <div 
               ref={gridContainerRef}
@@ -474,7 +664,7 @@ export default function ProjectGrid() {
 
           {/* Stage Footer Hint */}
           <div className="projects-stage-hint">
-            <span>Scroll to see 3D formation</span>
+            <span>Scroll down to travel through stars</span>
             <span>&bull;</span>
             <span>Click any card to inspect full case study</span>
           </div>
