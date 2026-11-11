@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { siteConfig } from '../config/site';
 import { Menu, X, ArrowUpRight, Zap, ZapOff } from 'lucide-react';
+import { smoothScrollTo } from '../utils/scrollHelper';
 
 export default function Header({ motionEnabled, toggleMotion, onTriggerRebuild }) {
   const [activeSection, setActiveSection] = useState('hero');
@@ -58,7 +59,13 @@ export default function Header({ motionEnabled, toggleMotion, onTriggerRebuild }
   return (
     <header className="site-header" role="banner">
       {/* Brand Wordmark */}
-      <a href="#hero" className="wordmark" aria-label={`${siteConfig.identity.displayName} home`} style={{ display: 'inline-flex', alignItems: 'center' }}>
+      <a 
+        href="#hero" 
+        onClick={(e) => { e.preventDefault(); smoothScrollTo('hero'); }}
+        className="wordmark" 
+        aria-label={`${siteConfig.identity.displayName} home`} 
+        style={{ display: 'inline-flex', alignItems: 'center' }}
+      >
         {siteConfig.identity.avatar && (
           <img
             src={siteConfig.identity.avatar}
@@ -83,6 +90,7 @@ export default function Header({ motionEnabled, toggleMotion, onTriggerRebuild }
           <a
             key={link.id}
             href={link.href}
+            onClick={(e) => { e.preventDefault(); smoothScrollTo(link.id); }}
             className={activeSection === link.id ? 'active' : ''}
           >
             {link.label}
@@ -183,7 +191,11 @@ export default function Header({ motionEnabled, toggleMotion, onTriggerRebuild }
               key={link.id}
               href={link.href}
               className={activeSection === link.id ? 'active' : ''}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                smoothScrollTo(link.id);
+              }}
             >
               {link.label}
             </a>

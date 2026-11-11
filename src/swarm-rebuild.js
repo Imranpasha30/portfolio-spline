@@ -3894,6 +3894,9 @@ import { mount3DCyberSpiderQueen } from './utils/cyberSpider3D';
     }
 
     async run() {
+      try {
+        window.dispatchEvent(new CustomEvent('swarm-rebuild-start'));
+      } catch (_) {}
       this.env = detectEnv();
       const shotP = this.loadShot();
       this.view = new View(this.env);
@@ -4349,6 +4352,9 @@ import { mount3DCyberSpiderQueen } from './utils/cyberSpider3D';
 
     destroy(reveal) {
       unhidePage();
+      try {
+        window.dispatchEvent(new CustomEvent('swarm-rebuild-end'));
+      } catch (_) {}
       if (this.sfx) {
         if (reveal) this.sfx.release();
         this.sfx.close(reveal ? 1.4 : 0.25);
@@ -4427,6 +4433,9 @@ import { mount3DCyberSpiderQueen } from './utils/cyberSpider3D';
     const a = app;
     app = null;
     a.destroy(reveal);
+    try {
+      window.dispatchEvent(new CustomEvent('swarm-rebuild-end'));
+    } catch (_) {}
   }
 
   function restart() {

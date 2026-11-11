@@ -118,55 +118,58 @@ export default function App() {
       {/* Footer */}
       <Footer />
 
-      {/* Floating In-Page Swarm Rebuild Button (Replay anytime) */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 80,
-        }}
-      >
-        <button
-          type="button"
-          onClick={triggerSwarmRebuild}
-          title="Replay Swarm Rebuild Animation (Press 'S' or Alt+Shift+S)"
+      {/* Floating In-Page Swarm Rebuild Button (Replay anytime - shown after scrolling down) */}
+      {scrollProgress > 0.08 && (
+        <div
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '9px',
-            background: 'radial-gradient(135% 150% at 50% -20%, rgba(255, 255, 255, 0.16) 0%, rgba(32, 20, 24, 0.55) 45%, rgba(10, 10, 14, 0.86) 100%)',
-            backdropFilter: 'blur(28px) saturate(210%) contrast(105%)',
-            WebkitBackdropFilter: 'blur(28px) saturate(210%) contrast(105%)',
-            border: '1px solid rgba(255, 255, 255, 0.22)',
-            color: '#ffffff',
-            padding: '10px 18px',
-            borderRadius: '9999px',
-            fontSize: '12px',
-            fontWeight: '700',
-            letterSpacing: '0.04em',
-            boxShadow: '0 20px 44px -8px rgba(0, 0, 0, 0.75), 0 0 30px -4px rgba(239, 65, 81, 0.28), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.42)',
-            cursor: 'pointer',
-            transition: 'all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 80,
+            animation: 'fadeIn 0.25s ease',
           }}
         >
-          <Sparkles size={14} style={{ color: 'var(--red)' }} />
-          <span>REPLAY SWARM</span>
-          <kbd
+          <button
+            type="button"
+            onClick={triggerSwarmRebuild}
+            title="Replay Swarm Rebuild Animation (Press 'S' or Alt+Shift+S)"
             style={{
-              background: 'rgba(255, 255, 255, 0.12)',
-              padding: '2px 7px',
-              borderRadius: '999px',
-              fontSize: '10px',
-              fontFamily: 'monospace',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '9px',
+              background: 'radial-gradient(135% 150% at 50% -20%, rgba(255, 255, 255, 0.16) 0%, rgba(32, 20, 24, 0.55) 45%, rgba(10, 10, 14, 0.86) 100%)',
+              backdropFilter: 'blur(28px) saturate(210%) contrast(105%)',
+              WebkitBackdropFilter: 'blur(28px) saturate(210%) contrast(105%)',
               border: '1px solid rgba(255, 255, 255, 0.22)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)',
+              color: '#ffffff',
+              padding: '10px 18px',
+              borderRadius: '9999px',
+              fontSize: '12px',
+              fontWeight: '700',
+              letterSpacing: '0.04em',
+              boxShadow: '0 20px 44px -8px rgba(0, 0, 0, 0.75), 0 0 30px -4px rgba(239, 65, 81, 0.28), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.42)',
+              cursor: 'pointer',
+              transition: 'all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
             }}
           >
-            S
-          </kbd>
-        </button>
-      </div>
+            <Sparkles size={14} style={{ color: 'var(--red)' }} />
+            <span>REPLAY SWARM</span>
+            <kbd
+              style={{
+                background: 'rgba(255, 255, 255, 0.12)',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                fontSize: '10px',
+                fontFamily: 'monospace',
+                border: '1px solid rgba(255, 255, 255, 0.22)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)',
+              }}
+            >
+              S
+            </kbd>
+          </button>
+        </div>
+      )}
     </>
   );
 }

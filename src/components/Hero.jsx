@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { siteConfig } from '../config/site';
 import { ArrowDown, ArrowUpRight, MapPin, Sparkles, FileText } from 'lucide-react';
 import CyberSpider3D from './CyberSpider3D';
+import { smoothScrollTo } from '../utils/scrollHelper';
 
 export default function Hero() {
   const { identity, metrics, preferences } = siteConfig;
@@ -92,12 +93,20 @@ export default function Hero() {
           </p>
 
           <div className="hero-actions">
-            <a href="#work" className="btn-primary">
+            <a 
+              href="#work" 
+              onClick={(e) => { e.preventDefault(); smoothScrollTo('work'); }}
+              className="btn-primary"
+            >
               <span>Explore Work</span>
               <ArrowDown size={15} aria-hidden="true" />
             </a>
 
-            <a href="#contact" className="btn-secondary">
+            <a 
+              href="#contact" 
+              onClick={(e) => { e.preventDefault(); smoothScrollTo('contact'); }}
+              className="btn-secondary"
+            >
               <span>Get In Touch</span>
               <ArrowUpRight size={15} aria-hidden="true" />
             </a>
@@ -156,54 +165,26 @@ export default function Hero() {
             )}
           </div>
 
-          {/* Visual Mode Switcher Pill (Placed below the container) */}
-          <div className="hero-visual-toggle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '14px' }}>
+          {/* Visual Mode Switcher Pill (Placed cleanly below the container) */}
+          <div className="hero-visual-toggle" role="tablist" aria-label="Hero visual view mode">
             <button
               type="button"
+              role="tab"
+              aria-selected={visualMode === 'spider'}
               onClick={() => setVisualMode('spider')}
-              className={`view-pill-btn ${visualMode === 'spider' ? 'active' : ''}`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '999px',
-                fontSize: '11px',
-                fontWeight: '700',
-                letterSpacing: '0.04em',
-                background: visualMode === 'spider' ? 'rgba(0, 102, 255, 0.28)' : 'rgba(255, 255, 255, 0.05)',
-                border: visualMode === 'spider' ? '1px solid #0066ff' : '1px solid rgba(255, 255, 255, 0.14)',
-                color: visualMode === 'spider' ? '#fff' : '#a1a1aa',
-                boxShadow: visualMode === 'spider' ? '0 0 16px rgba(0, 102, 255, 0.45)' : 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
+              className={`view-pill-btn ${visualMode === 'spider' ? 'active-spider' : ''}`}
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: visualMode === 'spider' ? '#0066ff' : '#71717a' }} />
+              <span className="view-pill-dot" aria-hidden="true" />
               <span>🕷️ 3D ARACHNID MK-IX</span>
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={visualMode === 'portrait'}
               onClick={() => setVisualMode('portrait')}
-              className={`view-pill-btn ${visualMode === 'portrait' ? 'active' : ''}`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '999px',
-                fontSize: '11px',
-                fontWeight: '700',
-                letterSpacing: '0.04em',
-                background: visualMode === 'portrait' ? 'rgba(239, 65, 81, 0.28)' : 'rgba(255, 255, 255, 0.05)',
-                border: visualMode === 'portrait' ? '1px solid #ef4151' : '1px solid rgba(255, 255, 255, 0.14)',
-                color: visualMode === 'portrait' ? '#fff' : '#a1a1aa',
-                boxShadow: visualMode === 'portrait' ? '0 0 16px rgba(239, 65, 81, 0.45)' : 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
+              className={`view-pill-btn ${visualMode === 'portrait' ? 'active-portrait' : ''}`}
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: visualMode === 'portrait' ? '#ef4151' : '#71717a' }} />
+              <span className="view-pill-dot" aria-hidden="true" />
               <span>📷 PORTRAIT</span>
             </button>
           </div>
@@ -224,7 +205,12 @@ export default function Hero() {
             </div>
           ))}
 
-          <a href="#work" className="hero-scroll-cue" aria-label="Scroll down to work">
+          <a 
+            href="#work" 
+            onClick={(e) => { e.preventDefault(); smoothScrollTo('work'); }}
+            className="hero-scroll-cue" 
+            aria-label="Scroll down to work"
+          >
             <span>Scroll</span>
             <ArrowDown size={12} className="accent" />
           </a>

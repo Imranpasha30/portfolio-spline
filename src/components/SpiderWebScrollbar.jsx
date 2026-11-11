@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { smoothScrollTo } from '../utils/scrollHelper';
 
 const SECTIONS = [
   { id: 'hero', label: 'HERO', icon: '🕷️' },
@@ -103,10 +104,7 @@ export default function SpiderWebScrollbar() {
   // Section quick jump
   const scrollToSection = (id, e) => {
     e.stopPropagation();
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    smoothScrollTo(id);
   };
 
   const percentText = Math.round(scrollProgress * 100);
@@ -119,7 +117,11 @@ export default function SpiderWebScrollbar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Top Silk Anchor Node */}
-      <div className="web-rail-anchor top" title="Top of Page" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+      <div 
+        className="web-rail-anchor top" 
+        title="Top of Page" 
+        onClick={() => smoothScrollTo('hero')}
+      >
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
           <circle cx="12" cy="12" r="5" stroke="#0066ff" strokeWidth="1.5" />
           <path d="M12 2v5M12 17v5M2 12h5M17 12h5" stroke="#0066ff" strokeWidth="1.2" opacity="0.6" />
